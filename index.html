@@ -64,7 +64,7 @@
     background: radial-gradient(ellipse at 20% -10%, var(--bg-2), var(--bg-0) 60%);
     color:var(--text-hi);
     font-family:var(--font-body);
-    padding:18px 14px 90px;
+    padding:14px 12px 76px;
     position:relative;
     overflow-x:hidden;
     transition:background .5s ease;
@@ -76,64 +76,60 @@
     opacity:var(--star-op); transition:opacity .5s ease;
   }
 
-  .app{ position:relative; z-index:1; max-width:560px; margin:0 auto; }
+  .app{ position:relative; z-index:1; max-width:520px; margin:0 auto; }
 
   /* ---- header ---- */
   header{
-    display:flex; align-items:flex-start; justify-content:space-between;
-    gap:10px; margin-bottom:22px;
+    display:flex; align-items:center; justify-content:space-between;
+    gap:10px; margin-bottom:14px;
   }
   .title-block h1{
     font-family:var(--font-display);
     font-weight:600;
-    font-size:clamp(28px,7vw,38px);
-    margin:0 0 2px;
+    font-size:clamp(24px,6vw,32px);
+    margin:0;
     letter-spacing:.02em;
     background:linear-gradient(120deg, var(--text-hi), var(--accent));
     -webkit-background-clip:text; background-clip:text; color:transparent;
   }
-  .title-block .tagline{
-    font-size:12.5px; color:var(--text-faint); letter-spacing:.04em; text-transform:uppercase;
-  }
   .clock-block{
     text-align:right; font-family:var(--font-mono); flex-shrink:0;
   }
-  .clock-block .time{ font-size:15px; color:var(--text-hi); font-weight:600; }
-  .clock-block .date{ font-size:11px; color:var(--text-faint); margin-top:1px; }
-  .settings-btn{
-    margin-left:8px; width:34px; height:34px; border-radius:50%;
-    border:1px solid var(--card-border); background:var(--card); color:var(--text-lo);
-    cursor:pointer; font-size:16px; display:inline-flex; align-items:center; justify-content:center;
+  .clock-block .time{ font-size:13px; color:var(--text-hi); font-weight:600; }
+  .clock-block .date{ font-size:10px; color:var(--text-faint); margin-top:1px; }
+  .header-right{ display:flex; align-items:center; gap:10px; }
+  .header-refresh-btn{
+    width:44px; height:44px; border-radius:50%; flex-shrink:0;
+    border:1px solid var(--card-border); background:var(--accent); color:var(--bg-0);
+    cursor:pointer; display:inline-flex; align-items:center; justify-content:center;
     transition:.2s;
   }
-  .settings-btn:hover{ color:var(--accent); border-color:var(--accent); }
-  .header-right{ display:flex; align-items:flex-start; }
+  .header-refresh-btn svg{ width:28px; height:28px; }
+  .header-refresh-btn:hover{ filter:brightness(1.08); }
+  .header-refresh-btn.spin svg{ animation:spin .6s linear; }
 
   /* ---- settings panel ---- */
   .settings-panel{
     background:var(--card); border:1px solid var(--card-border); border-radius:var(--radius);
-    padding:16px; margin-bottom:20px; display:none; gap:16px; flex-direction:column;
+    padding:12px; margin-bottom:12px; display:none; gap:12px; flex-direction:column;
     animation:fadeIn .25s ease;
   }
   .settings-panel.open{ display:flex; }
   @keyframes fadeIn{ from{opacity:0; transform:translateY(-6px);} to{opacity:1; transform:translateY(0);} }
-  .settings-row{ display:flex; flex-direction:column; gap:8px; }
-  .settings-row label.section-label{
-    font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:var(--text-faint);
-  }
-  .theme-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:8px; }
+  .settings-row{ display:flex; flex-direction:column; gap:6px; }
+  .theme-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:6px; }
   .theme-swatch{
-    border:1px solid var(--card-border); border-radius:var(--radius-sm); padding:8px 4px;
+    border:1px solid var(--card-border); border-radius:var(--radius-sm); padding:6px 4px;
     cursor:pointer; text-align:center; background:var(--bg-1); color:var(--text-lo);
-    font-size:11px; transition:.2s;
+    font-size:10.5px; transition:.2s;
   }
   .theme-swatch.active{ border-color:var(--accent); color:var(--text-hi); box-shadow:0 0 0 1px var(--accent); }
-  .theme-dot{ width:16px; height:16px; border-radius:50%; margin:0 auto 6px; }
+  .theme-dot{ width:14px; height:14px; border-radius:50%; margin:0 auto 5px; }
   .gender-toggle, .datemode-toggle{ display:flex; gap:8px; }
   .toggle-btn{
-    flex:1; padding:9px 10px; border-radius:var(--radius-sm); border:1px solid var(--card-border);
-    background:var(--bg-1); color:var(--text-lo); cursor:pointer; font-size:13px; font-weight:600;
-    transition:.2s;
+    flex:1; padding:8px 10px; border-radius:var(--radius-sm); border:1px solid var(--card-border);
+    background:var(--bg-1); color:var(--text-lo); cursor:pointer; font-size:13px; font-weight:700;
+    transition:.2s; letter-spacing:.03em;
   }
   .toggle-btn.active{ background:var(--accent); color:var(--bg-0); border-color:var(--accent); }
   input[type="datetime-local"]{
@@ -141,24 +137,23 @@
     border-radius:var(--radius-sm); padding:8px 10px; font-family:var(--font-mono); font-size:13px;
     width:100%; color-scheme:dark;
   }
-  .range-note{ font-size:11px; color:var(--text-faint); }
 
   /* ---- meter ---- */
   .meter-card{
     background:var(--card); border:1px solid var(--card-border); border-radius:var(--radius);
-    padding:26px 20px 22px; margin-bottom:18px; text-align:center; position:relative; overflow:hidden;
+    padding:18px 16px 14px; margin-bottom:12px; text-align:center; position:relative; overflow:hidden;
   }
   .meter-pct{
-    font-family:var(--font-display); font-size:56px; font-weight:600; line-height:1;
-    margin-bottom:4px; letter-spacing:.01em; transition:color .4s ease;
+    font-family:var(--font-display); font-size:44px; font-weight:600; line-height:1;
+    margin-bottom:2px; letter-spacing:.01em; transition:color .4s ease;
   }
-  .meter-status{ font-size:13px; color:var(--text-lo); margin-bottom:18px; min-height:16px; }
+  .meter-status{ font-size:12.5px; color:var(--text-lo); margin-bottom:12px; min-height:16px; }
   .meter-track{
-    position:relative; height:22px; border-radius:11px; background:var(--bg-1);
+    position:relative; height:18px; border-radius:9px; background:var(--bg-1);
     border:1px solid var(--card-border); overflow:hidden;
   }
   .meter-fill{
-    height:100%; width:0%; border-radius:11px 0 0 11px;
+    height:100%; width:0%; border-radius:9px 0 0 9px;
     transition:width .8s cubic-bezier(.22,.9,.3,1), background .5s ease;
     position:relative;
   }
@@ -167,58 +162,62 @@
     background:linear-gradient(90deg, transparent, rgba(255,255,255,.25));
   }
   .meter-marker{
-    position:absolute; top:-4px; width:2px; height:30px; background:var(--text-faint); opacity:.5;
+    position:absolute; top:-3px; width:2px; height:24px; background:var(--text-faint); opacity:.5;
   }
-  .meter-scale{ display:flex; justify-content:space-between; font-size:10px; color:var(--text-faint); margin-top:6px; font-family:var(--font-mono); }
+  .meter-scale{ display:flex; justify-content:space-between; font-size:9.5px; color:var(--text-faint); margin-top:4px; font-family:var(--font-mono); }
 
-  /* ---- zodiac row ---- */
+  /* ---- zodiac / system card ---- */
   .zodiac-card{
     background:var(--card); border:1px solid var(--card-border); border-radius:var(--radius);
-    padding:14px; margin-bottom:18px;
+    padding:12px; margin-bottom:12px;
   }
-  .zodiac-card .section-label{ font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:var(--text-faint); margin-bottom:10px; display:block;}
+  .gender-row{ display:flex; gap:8px; margin-bottom:8px; }
+  .gender-row .toggle-btn{ text-transform:uppercase; }
+  .hint-box{
+    text-align:center; font-size:11px; font-weight:700; letter-spacing:.06em;
+    color:var(--accent); background:var(--bg-1); border:1px solid var(--card-border);
+    border-radius:var(--radius-sm); padding:7px 8px; margin-bottom:10px; text-transform:uppercase;
+  }
   .zodiac-row{ display:grid; grid-template-columns:repeat(7,1fr); gap:6px; }
   .zbtn{
     aspect-ratio:1; display:flex; align-items:center; justify-content:center;
     border-radius:10px; border:1px solid var(--card-border); background:var(--bg-1);
-    color:var(--text-lo); font-size:18px; cursor:pointer; transition:.15s;
+    color:var(--text-lo); font-size:26px; line-height:1; cursor:pointer; transition:.15s; padding:0;
   }
   .zbtn:hover{ border-color:var(--accent); color:var(--text-hi); }
   .zbtn.active{ background:var(--accent); border-color:var(--accent); color:var(--bg-0); box-shadow:0 0 14px var(--accent); }
-  .zbtn.global{ font-size:14px; font-weight:700; }
-  .zodiac-current{ font-size:11.5px; color:var(--text-faint); margin-top:10px; text-align:center; }
 
   /* ---- breakdown ---- */
   .breakdown-card{
     background:var(--card); border:1px solid var(--card-border); border-radius:var(--radius);
-    padding:14px 16px; margin-bottom:18px;
+    padding:12px 14px; margin-bottom:12px;
   }
-  .breakdown-card .section-label{ font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:var(--text-faint); margin-bottom:10px; display:block;}
-  .bd-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:10px; }
+  .bd-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:8px; }
   .bd-item{ text-align:center; }
-  .bd-item .bd-num{ font-family:var(--font-mono); font-size:18px; font-weight:700; color:var(--text-hi); }
-  .bd-item .bd-label{ font-size:10px; color:var(--text-faint); text-transform:uppercase; letter-spacing:.04em; margin-top:2px; }
+  .bd-item .bd-num{ font-family:var(--font-mono); font-size:17px; font-weight:700; color:var(--text-hi); }
+  .bd-item .bd-label{ font-size:9.5px; color:var(--text-faint); text-transform:uppercase; letter-spacing:.04em; margin-top:2px; }
 
   /* ---- footer ---- */
-  footer{ text-align:center; font-size:11.5px; color:var(--text-faint); padding-top:6px; }
+  footer{ text-align:center; font-size:11.5px; color:var(--text-faint); padding-top:4px; }
   footer a{ color:var(--text-lo); text-decoration:none; border-bottom:1px dotted var(--text-faint); }
   footer a:hover{ color:var(--accent); }
   footer .sep{ margin:0 8px; opacity:.5; }
-  .disclaimer-line{ font-size:10.5px; margin-top:8px; line-height:1.5; opacity:.75; }
+  .disclaimer-line{ font-size:10.5px; margin-top:6px; line-height:1.4; opacity:.75; }
 
-  /* ---- refresh button ---- */
+  /* ---- floating refresh button ---- */
   .refresh-btn{
-    position:fixed; right:18px; bottom:18px; width:52px; height:52px; border-radius:50%;
+    position:fixed; right:16px; bottom:16px; width:52px; height:52px; border-radius:50%;
     background:var(--accent); color:var(--bg-0); border:none; cursor:pointer;
-    font-size:22px; display:flex; align-items:center; justify-content:center;
+    display:flex; align-items:center; justify-content:center;
     box-shadow:0 6px 20px rgba(0,0,0,.4); z-index:5; transition:transform .2s;
   }
+  .refresh-btn svg{ width:28px; height:28px; }
   .refresh-btn:hover{ transform:rotate(45deg) scale(1.05); }
   .refresh-btn.spin svg{ animation:spin .6s linear; }
   @keyframes spin{ to{ transform:rotate(360deg); } }
 
   .out-of-range{
-    text-align:center; padding:10px; font-size:12.5px; color:#fca5a5; display:none;
+    text-align:center; padding:8px; font-size:12px; color:#fca5a5; display:none;
   }
   .out-of-range.show{ display:block; }
 
@@ -237,38 +236,28 @@
   <header>
     <div class="title-block">
       <h1>Pluto Phases Meter</h1>
-      <div class="tagline">Live situational reading</div>
     </div>
     <div class="header-right">
       <div class="clock-block">
         <div class="time" id="clockTime">--:--:--</div>
         <div class="date" id="clockDate">----‑--‑--</div>
       </div>
-      <button class="settings-btn" id="settingsBtn" title="Settings" aria-label="Settings">⚙</button>
+      <button class="header-refresh-btn" id="headerRefreshBtn" title="Refresh" aria-label="Refresh reading">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+      </button>
     </div>
   </header>
 
   <div class="settings-panel" id="settingsPanel">
     <div class="settings-row">
-      <label class="section-label">Theme</label>
       <div class="theme-grid" id="themeGrid"></div>
     </div>
     <div class="settings-row">
-      <label class="section-label">Which sign to look up</label>
-      <div class="gender-toggle" id="genderToggle">
-        <button class="toggle-btn active" data-gender="male">♂ Male</button>
-        <button class="toggle-btn" data-gender="female">♀ Female</button>
-      </div>
-      <div class="range-note" id="genderHint"></div>
-    </div>
-    <div class="settings-row">
-      <label class="section-label">Moment</label>
       <div class="datemode-toggle" id="dateModeToggle">
         <button class="toggle-btn active" data-mode="now">Now (live)</button>
         <button class="toggle-btn" data-mode="custom">Custom</button>
       </div>
       <input type="datetime-local" id="customDateInput" min="2017-01-01T00:00" max="2032-12-31T23:59" style="display:none;">
-      <div class="range-note">Valid for dates between 2017 and 2032 only.</div>
     </div>
   </div>
 
@@ -285,14 +274,15 @@
   </div>
 
   <div class="zodiac-card">
-    <span class="section-label">Choose a system</span>
+    <div class="gender-row" id="genderToggle">
+      <button class="toggle-btn active" data-gender="male">Male</button>
+      <button class="toggle-btn" data-gender="female">Female</button>
+    </div>
+    <div class="hint-box" id="genderHint">Use your Sun sign</div>
     <div class="zodiac-row" id="zodiacRow"></div>
-    <div class="zodiac-current" id="zodiacCurrent"></div>
-    <div class="range-note" style="margin-top:6px;text-align:center;">∞ = Global. Otherwise tap the sign your gender's natal placement falls in — see Settings for which one.</div>
   </div>
 
   <div class="breakdown-card">
-    <span class="section-label">Factors read this moment</span>
     <div class="bd-grid" id="breakdownGrid"></div>
   </div>
 
@@ -306,7 +296,7 @@
 </div>
 
 <button class="refresh-btn" id="refreshBtn" title="Refresh" aria-label="Refresh reading">
-  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
 </button>
 
 <script src="https://cdn.jsdelivr.net/npm/astronomy-engine/astronomy.browser.min.js"></script>
