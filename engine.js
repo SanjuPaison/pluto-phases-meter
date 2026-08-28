@@ -12,7 +12,7 @@ var WORKER_URL = "https://pluto-phases-meter-worker.sanjupaison.workers.dev/";
 (function(){
 "use strict";
 
-var _sym = ["\u221E","\u2648","\u2649","\u264A","\u264B","\u264C","\u264D","\u264E","\u264F","\u2650","\u2651","\u2652","\u2653"];
+var _sym = ["\uD83C\uDF10","\u2648","\u2649","\u264A","\u264B","\u264C","\u264D","\u264E","\u264F","\u2650","\u2651","\u2652","\u2653"];
 var _names = ["Global","Aries","Taurus","Gemini","Cancer","Leo","Virgo","Libra","Scorpio","Sagittarius","Capricorn","Aquarius","Pisces"];
 
 /* ecliptic longitude (deg, 0-360) -> zodiac sign number 1..12 (Aries=1)
@@ -154,25 +154,42 @@ function buildZodiacRow(){
   var wrap = document.getElementById("zodiacRow");
   wrap.innerHTML = "";
   var M = window.__plutoMeter;
-  for(var i=0;i<13;i++){
-    (function(idx){
-      var btn = document.createElement("button");
-      btn.className = "zbtn"+(idx===0?" global":"")+(state.activeSystem===idx?" active":"");
-      btn.title = M.names[idx];
-      btn.textContent = M.symbols[idx];
-      btn.addEventListener("click", function(){
-        if(state.activeSystem===idx) return;
-        state.activeSystem = idx;
-        refresh();
-      });
-      wrap.appendChild(btn);
-    })(i);
-  }
+
+  // render order: 12 signs, then Global, then Settings — Global/Settings
+  // are moved to the end per the requested layout. `order` holds the
+  // activeSystem index each button corresponds to (Settings has none).
+  var order = [1,2,3,4,5,6,7,8,9,10,11,12,0];
+
+  order.forEach(function(idx){
+    var btn = document.createElement("button");
+    btn.className = "zbtn"+(state.activeSystem===idx?" active":"");
+    btn.title = M.names[idx];
+    btn.textContent = M.symbols[idx];
+    btn.addEventListener("click", function(){
+      if(state.activeSystem===idx) return;
+      state.activeSystem = idx;
+      refresh();
+    });
+    wrap.appendChild(btn);
+  });
+
+  var settingsBtn = document.createElement("button");
+  settingsBtn.className = "zbtn";
+  settingsBtn.title = "Settings";
+  settingsBtn.setAttribute("aria-label", "Settings");
+  settingsBtn.textContent = "\u2699";
+  settingsBtn.addEventListener("click", function(){
+    document.getElementById("settingsPanel").classList.toggle("open");
+  });
+  wrap.appendChild(settingsBtn);
 }
+
+var ZODIAC_ORDER = [1,2,3,4,5,6,7,8,9,10,11,12,0]; // matches buildZodiacRow's render order
 
 function highlightActiveZodiac(){
   var wrap = document.getElementById("zodiacRow");
-  Array.prototype.forEach.call(wrap.children, function(el, idx){
+  Array.prototype.forEach.call(wrap.children, function(el, i){
+    var idx = ZODIAC_ORDER[i]; // undefined for the trailing Settings button — never matches
     el.classList.toggle("active", idx===state.activeSystem);
   });
 }
@@ -210,10 +227,7 @@ function paintResult(pct, factors, opts){
   fill.style.width = pct + "%";
   fill.style.background = color;
   statusEl.textContent = (opts.stale ? "(Last known reading — live update unavailable) " : "") + statusForPct(pct);
-
-  var M = window.__plutoMeter;
-  var sysLabel = state.activeSystem===0 ? "Global" : M.names[state.activeSystem];
-  document.getElementById("zodiacCurrent").textContent = "Reading via " + sysLabel;
+  stampLastRefresh(opts.at ? new Date(opts.at) : new Date());
 
   highlightActiveZodiac();
   renderBreakdown(factors);
@@ -241,7 +255,6 @@ function refresh(){
     pctEl.style.color = "var(--text-faint)";
     document.getElementById("meterFill").style.width = "0%";
     document.getElementById("statusText").textContent = "Pick a date between 2017 and 2032.";
-    document.getElementById("zodiacCurrent").textContent = "";
     document.getElementById("breakdownGrid").innerHTML = "";
     return;
   }
@@ -252,7 +265,7 @@ function refresh(){
   // memoized: identical inputs to what's already on screen — skip the network call
   var cached = readCache();
   if(cached && cached.key===key){
-    paintResult(cached.pct, cached.factors, {});
+    paintResult(cached.pct, cached.factors, { at: cached.at });
     return;
   }
 
@@ -262,13 +275,14 @@ function refresh(){
   var M = window.__plutoMeter;
   M.computeRemote(moment, state.activeSystem).then(function(result){
     state.busy = false;
-    paintResult(result.pct, result.factors, {});
-    writeCache({ key: key, pct: result.pct, factors: result.factors, at: Date.now() });
+    var now = Date.now();
+    paintResult(result.pct, result.factors, { at: now });
+    writeCache({ key: key, pct: result.pct, factors: result.factors, at: now });
   }).catch(function(err){
     state.busy = false;
     var fallback = readCache();
     if(fallback){
-      paintResult(fallback.pct, fallback.factors, { stale:true });
+      paintResult(fallback.pct, fallback.factors, { stale:true, at: fallback.at });
     } else {
       document.getElementById("pctDisplay").textContent = "--%";
       document.getElementById("pctDisplay").style.color = "var(--text-faint)";
@@ -282,20 +296,32 @@ function updateGenderHint(){
   var el = document.getElementById("genderHint");
   if(!el) return;
   var which = state.gender === "male" ? "Sun" : "Moon";
-  el.innerHTML = "This doesn't change the reading itself — it's just a pointer: look up your <b>natal " + which + " sign</b> (from your own birth chart, not today's sky) and tap its symbol below to score the reading with your table.";
+  el.textContent = "Use your " + which + " sign";
 }
 
-function tickClock(){
-  var now = new Date();
-  document.getElementById("clockTime").textContent = fmtClock(now);
-  document.getElementById("clockDate").textContent = fmtDate(now);
+function stampLastRefresh(d){
+  d = d || new Date();
+  document.getElementById("clockTime").textContent = fmtClock(d);
+  document.getElementById("clockDate").textContent = fmtDate(d);
+}
+
+function forceRefresh(btnEl){
+  btnEl.classList.add("spin");
+  setTimeout(function(){ btnEl.classList.remove("spin"); }, 650);
+  // a manual refresh should force a real check even if the memoized key
+  // matches, in case the underlying moment or Worker result has moved on
+  var moment = currentMoment();
+  if(inRange(moment)){
+    var key = keyFor(moment, state.activeSystem);
+    var cached = readCache();
+    if(cached && cached.key===key){
+      try{ localStorage.removeItem(CACHE_KEY); } catch(e){}
+    }
+  }
+  refresh();
 }
 
 function wireSettings(){
-  document.getElementById("settingsBtn").addEventListener("click", function(){
-    document.getElementById("settingsPanel").classList.toggle("open");
-  });
-
   document.getElementById("genderToggle").addEventListener("click", function(e){
     var btn = e.target.closest(".toggle-btn");
     if(!btn) return;
@@ -331,23 +357,8 @@ function wireSettings(){
     refresh();
   });
 
-  document.getElementById("refreshBtn").addEventListener("click", function(){
-    this.classList.add("spin");
-    var self = this;
-    setTimeout(function(){ self.classList.remove("spin"); }, 650);
-    // a manual refresh should force a real check even if the memoized key
-    // matches, in case the underlying moment or Worker result has moved on
-    var moment = currentMoment();
-    if(inRange(moment)){
-      var key = keyFor(moment, state.activeSystem);
-      var cached = readCache();
-      if(cached && cached.key===key){
-        // force a fresh network call by clearing the memoized cache entry first
-        try{ localStorage.removeItem(CACHE_KEY); } catch(e){}
-      }
-    }
-    refresh();
-  });
+  document.getElementById("refreshBtn").addEventListener("click", function(){ forceRefresh(this); });
+  document.getElementById("headerRefreshBtn").addEventListener("click", function(){ forceRefresh(this); });
 }
 
 function drawStars(){
@@ -372,9 +383,7 @@ function init(){
   wireSettings();
   updateGenderHint();
   drawStars();
-  tickClock();
-  setInterval(tickClock, 1000); // clock display only — no network cost, no recalculation
-  refresh(); // one call on load; after this, only the refresh button or a settings change triggers another
+  refresh(); // one call on load; after this, only a refresh button or a settings change triggers another
 }
 
 if(document.readyState==="loading"){
