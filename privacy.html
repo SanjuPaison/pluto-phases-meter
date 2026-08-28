@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Privacy Policy — Pluto Phases Meter</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=EB+Garamond:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  body { max-width: 720px; margin: 3rem auto; padding: 0 1.5rem 4rem; font-family: 'EB Garamond', Georgia, serif; font-size: 1.15rem; line-height: 1.6; color: #2b2016; background: #f3ecd9; }
+  h1 { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 2.2rem; }
+  h2 { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 1.4rem; color: #7a2036; margin-top: 2rem; }
+  a { color: #7a2036; }
+  .fill-in { background: #fff3d6; padding: 0 4px; border-radius: 3px; }
+  .back { display:inline-block; margin-top: 2rem; }
+</style>
+</head>
+<body>
+<h1>Privacy Policy — Pluto Phases Meter</h1>
+<p><em>This policy covers the Pluto Phases Meter web widget only.</em></p>
+
+<h2>1. No Personal Data Is Collected</h2>
+<p>This widget does not ask for, collect, or store your name, birth date, birth time, birth place, email address, or any other personal information. There is no account, no form submission, and no server that receives or retains anything you do inside the widget.</p>
+
+<h2>2. What Happens When You Get a Reading</h2>
+<p>When the widget calculates your reading, your browser first works out the Sun and Moon's current zodiac positions locally, using public astronomical data — no request leaves your device for that part. It then sends a small set of plain numbers to a server-side function the developer runs (a Cloudflare Worker) to apply the scoring rules and get back a percentage:</p>
+<ul>
+<li>the current hour, day of the week, day, month, and year on your device's clock (or the custom date/time you entered, if you're using that mode);</li>
+<li>the Sun and Moon's zodiac longitude (a number describing their position — public astronomical data, not personal information);</li>
+<li>which of the 13 buttons you have selected.</li>
+</ul>
+<p>None of this identifies you personally — there is no name, birth date, birth place, email address, or account involved anywhere in the widget. The Worker uses these numbers only to compute and return the percentage and does not store them.</p>
+
+<h2>3. Two Third-Party Requests</h2>
+<p><strong>Astronomy library:</strong> to calculate the Sun and Moon's positions, the widget loads a small, publicly available, open-source astronomical library from a content delivery network (CDN), currently jsDelivr. Loading any file from a CDN necessarily sends your browser's request (which typically includes your IP address and browser information) to that CDN provider, subject to its own standard server-log practices — see <a href="https://www.jsdelivr.com/privacy-policy-jsdelivr-net" target="_blank" rel="noopener">jsDelivr's privacy policy</a>.</p>
+<p><strong>Scoring calculation:</strong> the widget sends the plain numbers described in Section 2 to a Cloudflare Worker the developer operates, in order to compute your reading. This request passes through Cloudflare's network and is subject to <a href="https://www.cloudflare.com/privacypolicy/" target="_blank" rel="noopener">Cloudflare's privacy policy</a> in addition to this one.</p>
+<p>If this page also loads web fonts from Google Fonts, that similarly sends a standard font request to Google, subject to <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Google's privacy policy</a>.</p>
+
+<h2>4. A Copy of Your Last Reading Is Kept on Your Own Device</h2>
+<p>To avoid unnecessary requests and to keep working briefly if the connection drops, the widget saves your most recent reading in your browser's local storage (on your device only). This is not sent to the developer or anyone else — it simply lets your browser show "last known reading" instead of nothing if a fresh calculation can't be completed. You can clear it at any time by clearing your browser's site data for this page. The widget does not otherwise use cookies or tracking of its own.</p>
+
+<h2>5. If This Widget Is Embedded Elsewhere</h2>
+<p>If this widget is embedded inside another website (for example, via an iframe on a page built with a site builder), that host site may apply its own separate cookies, analytics, or hosting-provider logging independently of this widget. This policy does not cover that host site — check its own privacy policy for details.</p>
+
+<h2>6. Where the Widget's Files Are Hosted</h2>
+<p>The widget's own code and data are hosted on GitHub Pages, and its scoring calculation runs on Cloudflare Workers. The page that embeds this widget is currently hosted on Nicepage. Serving any web page typically involves standard technical logging (such as IP address, browser type, and access times) by each hosting provider, handled under that provider's own policies rather than actively collected by the developer.</p>
+
+<h2>7. Children's Privacy</h2>
+<p>This widget does not knowingly collect personal information from anyone, including children, because it does not collect personal information from any user.</p>
+
+<h2>8. Changes to This Policy</h2>
+<p>This policy may be updated from time to time, including to reflect changes in hosting or the third-party services this widget relies on. Continued use of the widget after changes are posted constitutes acceptance of the updated policy.</p>
+
+<h2>9. Contact</h2>
+<p>Questions about this privacy policy can be directed via: <a href="https://lifeprediction.net" target="_blank" rel="noopener">lifeprediction.net</a></p>
+
+<a class="back" href="index.html">&larr; Back to the meter</a>
+</body>
+</html>
