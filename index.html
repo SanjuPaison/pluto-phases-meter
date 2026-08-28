@@ -64,7 +64,7 @@
     background: radial-gradient(ellipse at 20% -10%, var(--bg-2), var(--bg-0) 60%);
     color:var(--text-hi);
     font-family:var(--font-body);
-    padding:14px 12px 76px;
+    padding:14px 12px 20px;
     position:relative;
     overflow-x:hidden;
     transition:background .5s ease;
@@ -94,7 +94,9 @@
   }
   .clock-block{
     text-align:right; font-family:var(--font-mono); flex-shrink:0;
+    cursor:pointer; padding:2px 4px; border-radius:8px; transition:.15s;
   }
+  .clock-block:hover{ background:var(--bg-1); }
   .clock-block .time{ font-size:13px; color:var(--text-hi); font-weight:600; }
   .clock-block .date{ font-size:10px; color:var(--text-faint); margin-top:1px; }
   .header-right{ display:flex; align-items:center; gap:10px; }
@@ -107,24 +109,23 @@
   .header-refresh-btn svg{ width:28px; height:28px; }
   .header-refresh-btn:hover{ filter:brightness(1.08); }
   .header-refresh-btn.spin svg{ animation:spin .6s linear; }
+  @keyframes spin{ to{ transform:rotate(360deg); } }
 
-  /* ---- settings panel ---- */
-  .settings-panel{
+  /* ---- collapsible panels (moment + theme) ---- */
+  .collapsible-panel{
     background:var(--card); border:1px solid var(--card-border); border-radius:var(--radius);
     padding:12px; margin-bottom:12px; display:none; gap:12px; flex-direction:column;
     animation:fadeIn .25s ease;
   }
-  .settings-panel.open{ display:flex; }
+  .collapsible-panel.open{ display:flex; }
   @keyframes fadeIn{ from{opacity:0; transform:translateY(-6px);} to{opacity:1; transform:translateY(0);} }
-  .settings-row{ display:flex; flex-direction:column; gap:6px; }
-  .theme-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:6px; }
+  .theme-grid{ display:flex; justify-content:center; gap:14px; }
   .theme-swatch{
-    border:1px solid var(--card-border); border-radius:var(--radius-sm); padding:6px 4px;
-    cursor:pointer; text-align:center; background:var(--bg-1); color:var(--text-lo);
-    font-size:10.5px; transition:.2s;
+    width:34px; height:34px; border-radius:50%; padding:0;
+    cursor:pointer; background:var(--dot-color); border:2px solid transparent;
+    transition:.2s;
   }
-  .theme-swatch.active{ border-color:var(--accent); color:var(--text-hi); box-shadow:0 0 0 1px var(--accent); }
-  .theme-dot{ width:14px; height:14px; border-radius:50%; margin:0 auto 5px; }
+  .theme-swatch.active{ border-color:var(--text-hi); box-shadow:0 0 0 2px var(--card), 0 0 0 4px var(--dot-color); }
   .gender-toggle, .datemode-toggle{ display:flex; gap:8px; }
   .toggle-btn{
     flex:1; padding:8px 10px; border-radius:var(--radius-sm); border:1px solid var(--card-border);
@@ -174,9 +175,9 @@
   .gender-row{ display:flex; gap:8px; margin-bottom:8px; }
   .gender-row .toggle-btn{ text-transform:uppercase; }
   .hint-box{
-    text-align:center; font-size:11px; font-weight:700; letter-spacing:.06em;
+    text-align:center; font-size:13px; font-weight:700; letter-spacing:.03em;
     color:var(--accent); background:var(--bg-1); border:1px solid var(--card-border);
-    border-radius:var(--radius-sm); padding:7px 8px; margin-bottom:10px; text-transform:uppercase;
+    border-radius:var(--radius-sm); padding:8px 8px; margin-bottom:10px; text-transform:uppercase;
   }
   .zodiac-row{ display:grid; grid-template-columns:repeat(7,1fr); gap:6px; }
   .zbtn{
@@ -190,12 +191,12 @@
   /* ---- breakdown ---- */
   .breakdown-card{
     background:var(--card); border:1px solid var(--card-border); border-radius:var(--radius);
-    padding:12px 14px; margin-bottom:12px;
+    padding:10px 8px; margin-bottom:12px;
   }
-  .bd-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:8px; }
+  .bd-grid{ display:grid; grid-template-columns:repeat(7,1fr); gap:4px; }
   .bd-item{ text-align:center; }
-  .bd-item .bd-num{ font-family:var(--font-mono); font-size:17px; font-weight:700; color:var(--text-hi); }
-  .bd-item .bd-label{ font-size:9.5px; color:var(--text-faint); text-transform:uppercase; letter-spacing:.04em; margin-top:2px; }
+  .bd-item .bd-num{ font-family:var(--font-mono); font-size:14px; font-weight:700; color:var(--text-hi); }
+  .bd-item .bd-label{ font-size:8px; color:var(--text-faint); text-transform:uppercase; letter-spacing:.02em; margin-top:2px; }
 
   /* ---- footer ---- */
   footer{ text-align:center; font-size:11.5px; color:var(--text-faint); padding-top:4px; }
@@ -204,18 +205,6 @@
   footer .sep{ margin:0 8px; opacity:.5; }
   .disclaimer-line{ font-size:10.5px; margin-top:6px; line-height:1.4; opacity:.75; }
 
-  /* ---- floating refresh button ---- */
-  .refresh-btn{
-    position:fixed; right:16px; bottom:16px; width:52px; height:52px; border-radius:50%;
-    background:var(--accent); color:var(--bg-0); border:none; cursor:pointer;
-    display:flex; align-items:center; justify-content:center;
-    box-shadow:0 6px 20px rgba(0,0,0,.4); z-index:5; transition:transform .2s;
-  }
-  .refresh-btn svg{ width:28px; height:28px; }
-  .refresh-btn:hover{ transform:rotate(45deg) scale(1.05); }
-  .refresh-btn.spin svg{ animation:spin .6s linear; }
-  @keyframes spin{ to{ transform:rotate(360deg); } }
-
   .out-of-range{
     text-align:center; padding:8px; font-size:12px; color:#fca5a5; display:none;
   }
@@ -223,7 +212,6 @@
 
   @media (max-width:380px){
     .zodiac-row{ grid-template-columns:repeat(5,1fr); }
-    .bd-grid{ grid-template-columns:repeat(2,1fr); }
   }
 </style>
 </head>
@@ -238,7 +226,7 @@
       <h1>Pluto Phases Meter</h1>
     </div>
     <div class="header-right">
-      <div class="clock-block">
+      <div class="clock-block" id="clockBlock" title="Change now/custom moment">
         <div class="time" id="clockTime">--:--:--</div>
         <div class="date" id="clockDate">----‑--‑--</div>
       </div>
@@ -248,17 +236,12 @@
     </div>
   </header>
 
-  <div class="settings-panel" id="settingsPanel">
-    <div class="settings-row">
-      <div class="theme-grid" id="themeGrid"></div>
+  <div class="collapsible-panel" id="momentPanel">
+    <div class="datemode-toggle" id="dateModeToggle">
+      <button class="toggle-btn active" data-mode="now">Now (live)</button>
+      <button class="toggle-btn" data-mode="custom">Custom</button>
     </div>
-    <div class="settings-row">
-      <div class="datemode-toggle" id="dateModeToggle">
-        <button class="toggle-btn active" data-mode="now">Now (live)</button>
-        <button class="toggle-btn" data-mode="custom">Custom</button>
-      </div>
-      <input type="datetime-local" id="customDateInput" min="2017-01-01T00:00" max="2032-12-31T23:59" style="display:none;">
-    </div>
+    <input type="datetime-local" id="customDateInput" min="2017-01-01T00:00" max="2032-12-31T23:59" style="display:none;">
   </div>
 
   <div class="meter-card">
@@ -282,6 +265,10 @@
     <div class="zodiac-row" id="zodiacRow"></div>
   </div>
 
+  <div class="collapsible-panel" id="themePanel">
+    <div class="theme-grid" id="themeGrid"></div>
+  </div>
+
   <div class="breakdown-card">
     <div class="bd-grid" id="breakdownGrid"></div>
   </div>
@@ -294,10 +281,6 @@
   </footer>
 
 </div>
-
-<button class="refresh-btn" id="refreshBtn" title="Refresh" aria-label="Refresh reading">
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
-</button>
 
 <script src="https://cdn.jsdelivr.net/npm/astronomy-engine/astronomy.browser.min.js"></script>
 <script src="engine.js" defer></script>

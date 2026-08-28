@@ -138,9 +138,11 @@ function buildThemeGrid(){
   var wrap = document.getElementById("themeGrid");
   wrap.innerHTML = "";
   THEMES.forEach(function(t){
-    var el = document.createElement("div");
+    var el = document.createElement("button");
     el.className = "theme-swatch"+(t.id===state.theme?" active":"");
-    el.innerHTML = '<div class="theme-dot" style="background:'+t.dot+'"></div>'+t.label;
+    el.style.setProperty("--dot-color", t.dot);
+    el.title = t.label;
+    el.setAttribute("aria-label", t.label);
     el.addEventListener("click", function(){
       state.theme = t.id;
       document.body.setAttribute("data-theme", t.id);
@@ -179,7 +181,7 @@ function buildZodiacRow(){
   settingsBtn.setAttribute("aria-label", "Settings");
   settingsBtn.textContent = "\u2699";
   settingsBtn.addEventListener("click", function(){
-    document.getElementById("settingsPanel").classList.toggle("open");
+    document.getElementById("themePanel").classList.toggle("open");
   });
   wrap.appendChild(settingsBtn);
 }
@@ -200,8 +202,8 @@ function renderBreakdown(f){
   var items = [
     ["Hour", f.hour],
     ["Day", f.day],
-    ["Moon", M.symbols[f.moon] + " " + M.names[f.moon]],
-    ["Sun", M.symbols[f.sun] + " " + M.names[f.sun]],
+    ["Moon", M.symbols[f.moon]],
+    ["Sun", M.symbols[f.sun]],
     ["Month", f.month],
     ["Year", f.year],
     ["Date", f.date]
@@ -322,6 +324,10 @@ function forceRefresh(btnEl){
 }
 
 function wireSettings(){
+  document.getElementById("clockBlock").addEventListener("click", function(){
+    document.getElementById("momentPanel").classList.toggle("open");
+  });
+
   document.getElementById("genderToggle").addEventListener("click", function(e){
     var btn = e.target.closest(".toggle-btn");
     if(!btn) return;
@@ -357,8 +363,29 @@ function wireSettings(){
     refresh();
   });
 
-  document.getElementById("refreshBtn").addEventListener("click", function(){ forceRefresh(this); });
   document.getElementById("headerRefreshBtn").addEventListener("click", function(){ forceRefresh(this); });
+}
+
+/* Tell whatever page has embedded us (via iframe) how tall we actually are,
+   so it can resize the iframe to match instead of leaving blank space below
+   (or clipping us) with a guessed fixed height. Harmless if not embedded —
+   postMessage to a same-window "parent" is a no-op then. */
+function reportHeight(){
+  try{
+    var h = Math.max(document.documentElement.scrollHeight, document.body.scrollHeight);
+    window.parent.postMessage({ source: "pluto-phases-meter", height: h }, "*");
+  } catch(e){ /* ignore — e.g. cross-origin restrictions in unusual embeds */ }
+}
+
+function watchHeight(){
+  reportHeight();
+  if(window.ResizeObserver){
+    new ResizeObserver(reportHeight).observe(document.body);
+  } else {
+    // fallback for very old browsers without ResizeObserver
+    window.addEventListener("resize", reportHeight);
+    setInterval(reportHeight, 1000);
+  }
 }
 
 function drawStars(){
