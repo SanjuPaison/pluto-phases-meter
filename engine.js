@@ -229,7 +229,7 @@ function paintResult(pct, factors, opts){
   fill.style.width = pct + "%";
   fill.style.background = color;
   statusEl.textContent = (opts.stale ? "(Last known reading — live update unavailable) " : "") + statusForPct(pct);
-  stampLastRefresh(opts.at ? new Date(opts.at) : new Date());
+  stampMomentDisplay(opts.at ? new Date(opts.at) : new Date());
 
   highlightActiveZodiac();
   renderBreakdown(factors);
@@ -277,9 +277,9 @@ function refresh(){
   var M = window.__plutoMeter;
   M.computeRemote(moment, state.activeSystem).then(function(result){
     state.busy = false;
-    var now = Date.now();
-    paintResult(result.pct, result.factors, { at: now });
-    writeCache({ key: key, pct: result.pct, factors: result.factors, at: now });
+    var at = moment.getTime(); // the moment actually being read — "now" snapshot, or the chosen custom date/time
+    paintResult(result.pct, result.factors, { at: at });
+    writeCache({ key: key, pct: result.pct, factors: result.factors, at: at });
   }).catch(function(err){
     state.busy = false;
     var fallback = readCache();
@@ -301,7 +301,7 @@ function updateGenderHint(){
   el.textContent = "Use your " + which + " sign";
 }
 
-function stampLastRefresh(d){
+function stampMomentDisplay(d){
   d = d || new Date();
   document.getElementById("clockTime").textContent = fmtClock(d);
   document.getElementById("clockDate").textContent = fmtDate(d);
@@ -410,6 +410,7 @@ function init(){
   wireSettings();
   updateGenderHint();
   drawStars();
+  watchHeight(); // reports our height to the embedding page so it can auto-size the iframe
   refresh(); // one call on load; after this, only a refresh button or a settings change triggers another
 }
 
