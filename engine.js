@@ -388,28 +388,11 @@ function watchHeight(){
   }
 }
 
-function drawStars(){
-  var svg = document.getElementById("stars");
-  var n = 90;
-  var frag = document.createDocumentFragment();
-  for(var i=0;i<n;i++){
-    var c = document.createElementNS("http://www.w3.org/2000/svg","circle");
-    c.setAttribute("cx", (Math.random()*100)+"%");
-    c.setAttribute("cy", (Math.random()*100)+"%");
-    c.setAttribute("r", (Math.random()*1.3+.2).toFixed(2));
-    c.setAttribute("fill", "#ffffff");
-    c.setAttribute("opacity", (Math.random()*.6+.15).toFixed(2));
-    frag.appendChild(c);
-  }
-  svg.appendChild(frag);
-}
-
 function init(){
   buildThemeGrid();
   buildZodiacRow();
   wireSettings();
   updateGenderHint();
-  drawStars();
   watchHeight(); // reports our height to the embedding page so it can auto-size the iframe
   refresh(); // one call on load; after this, only a refresh button or a settings change triggers another
 }
