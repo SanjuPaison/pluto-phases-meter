@@ -196,22 +196,23 @@ function highlightActiveZodiac(){
   });
 }
 
-function renderBreakdown(f){
+function renderBreakdown(f, flags){
+  flags = flags || {};
   var grid = document.getElementById("breakdownGrid");
   var M = window.__plutoMeter;
   var items = [
-    ["Hour", f.hour],
-    ["Day", f.day],
-    ["Moon", M.symbols[f.moon]],
-    ["Sun", M.symbols[f.sun]],
-    ["Month", f.month],
-    ["Year", f.year],
-    ["Date", f.date]
+    ["Hour", f.hour, false],
+    ["Day", f.day, !!flags.day],
+    ["Moon", M.symbols[f.moon], !!flags.moon],
+    ["Sun", M.symbols[f.sun], !!flags.sun],
+    ["Month", f.month, !!flags.month],
+    ["Year", f.year, false],
+    ["Date", f.date, false]
   ];
   grid.innerHTML = "";
   items.forEach(function(it){
     var div = document.createElement("div");
-    div.className = "bd-item";
+    div.className = "bd-item" + (it[2] ? " penalty" : "");
     div.innerHTML = '<div class="bd-num">'+it[1]+'</div><div class="bd-label">'+it[0]+'</div>';
     grid.appendChild(div);
   });
@@ -232,7 +233,7 @@ function paintResult(pct, factors, opts){
   stampMomentDisplay(opts.at ? new Date(opts.at) : new Date());
 
   highlightActiveZodiac();
-  renderBreakdown(factors);
+  renderBreakdown(factors, opts.flags);
 }
 
 function setLoading(isLoading){
@@ -267,7 +268,7 @@ function refresh(){
   // memoized: identical inputs to what's already on screen — skip the network call
   var cached = readCache();
   if(cached && cached.key===key){
-    paintResult(cached.pct, cached.factors, { at: cached.at });
+    paintResult(cached.pct, cached.factors, { at: cached.at, flags: cached.flags });
     return;
   }
 
@@ -278,13 +279,13 @@ function refresh(){
   M.computeRemote(moment, state.activeSystem).then(function(result){
     state.busy = false;
     var at = moment.getTime(); // the moment actually being read — "now" snapshot, or the chosen custom date/time
-    paintResult(result.pct, result.factors, { at: at });
-    writeCache({ key: key, pct: result.pct, factors: result.factors, at: at });
+    paintResult(result.pct, result.factors, { at: at, flags: result.flags });
+    writeCache({ key: key, pct: result.pct, factors: result.factors, flags: result.flags, at: at });
   }).catch(function(err){
     state.busy = false;
     var fallback = readCache();
     if(fallback){
-      paintResult(fallback.pct, fallback.factors, { stale:true, at: fallback.at });
+      paintResult(fallback.pct, fallback.factors, { stale:true, at: fallback.at, flags: fallback.flags });
     } else {
       document.getElementById("pctDisplay").textContent = "--%";
       document.getElementById("pctDisplay").style.color = "var(--text-faint)";
