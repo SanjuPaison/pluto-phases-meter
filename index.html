@@ -1,80 +1,921 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-<title>Pluto Phases Meter</title>
-<meta name="description" content="A live 0-100% situational reading, recalculated from the current moment.">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pluto Phases — What Was Happening?</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="pluto-style.css">
+<link rel="stylesheet" href="https://sanjupaison.github.io/pluto-phases-meter/pluto-style.css">
+
+<style>
+  html { font-size: 19px; }
+  html, body {
+    margin: 0; padding: 0;
+    background: transparent;
+  }
+  #pluto-phases-widget.ppw-root {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem 2.5rem;
+    color: var(--text-hi);
+    font-family: var(--font-body);
+    font-weight: 300;
+    letter-spacing: 0.3px;
+    line-height: 1.6;
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius);
+    position: relative;
+  }
+  #pluto-phases-widget.ppw-root * { box-sizing: border-box; }
+
+  #pluto-phases-widget .ppw-eyebrow {
+    font-family: var(--font-display);
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--accent);
+    text-align: center;
+    margin: 0 0 0.4rem;
+  }
+  #pluto-phases-widget h2.ppw-title {
+    font-family: var(--font-display);
+    font-weight: 300;
+    font-size: clamp(1.8rem, 6vw, 2.4rem);
+    text-align: center;
+    margin: 0 0 0.4rem;
+    letter-spacing: 0.02em;
+    background: linear-gradient(120deg, var(--text-hi), var(--accent));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  #pluto-phases-widget .ppw-sub {
+    text-align: center;
+    color: var(--text-lo);
+    max-width: 560px;
+    margin: 0 auto 2rem;
+    font-size: 0.98rem;
+    font-weight: 300;
+  }
+  #pluto-phases-widget fieldset {
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius);
+    padding: 1.1rem 1.3rem 1.4rem;
+    margin: 0 0 1.2rem;
+    background: var(--bg-1);
+  }
+  #pluto-phases-widget legend {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--accent);
+    padding: 0 0.5rem;
+  }
+  #pluto-phases-widget .ppw-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+  #pluto-phases-widget .ppw-field { flex: 1 1 200px; }
+  #pluto-phases-widget .ppw-field.ppw-wide { flex: 1 1 100%; }
+  #pluto-phases-widget label {
+    display: block;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 600;
+    color: var(--text-faint);
+    margin-bottom: 0.35rem;
+  }
+  #pluto-phases-widget input[type="date"],
+  #pluto-phases-widget input[type="time"],
+  #pluto-phases-widget input[type="text"],
+  #pluto-phases-widget input[type="number"],
+  #pluto-phases-widget select,
+  #pluto-phases-widget textarea {
+    width: 100%;
+    font-family: var(--font-body);
+    font-size: 0.95rem;
+    padding: 0.6rem 0.7rem;
+    background: var(--bg-2);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-sm);
+    color: var(--text-hi);
+    color-scheme: dark;
+  }
+  #pluto-phases-widget input:focus,
+  #pluto-phases-widget select:focus,
+  #pluto-phases-widget textarea:focus {
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
+  }
+  #pluto-phases-widget textarea { resize: vertical; min-height: 4.5rem; }
+  #pluto-phases-widget .ppw-help {
+    font-size: 0.78rem;
+    color: var(--text-faint);
+    margin-top: 0.3rem;
+  }
+  #pluto-phases-widget .ppw-checkbox-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    color: var(--text-lo);
+    margin-top: 0.45rem;
+  }
+  #pluto-phases-widget input[type="radio"],
+  #pluto-phases-widget input[type="checkbox"] { width: 1.1em; height: 1.1em; accent-color: var(--accent); }
+
+  /* Gender toggle, restyled as pill buttons via :has() -- markup/JS unchanged */
+  #pluto-phases-widget .ppw-radio-group { display: flex; gap: 0.6rem; align-items: center; flex-wrap: wrap; margin-top: 0.55rem; }
+  #pluto-phases-widget .ppw-radio-group input[type="radio"] {
+    position: absolute; opacity: 0; width: 0; height: 0;
+  }
+  #pluto-phases-widget .ppw-radio-group label {
+    display: flex; align-items: center; justify-content: center; gap: 0.4rem; flex: 1;
+    text-transform: uppercase; letter-spacing: 0.03em; font-size: 0.8rem; font-weight: 700;
+    padding: 0.55rem 1rem; border-radius: var(--radius-sm); border: 1px solid var(--card-border);
+    background: var(--bg-2); color: var(--text-lo); cursor: pointer; transition: .2s; margin-bottom: 0;
+  }
+  #pluto-phases-widget .ppw-radio-group label:has(input:checked) {
+    background: var(--accent); color: var(--bg-0); border-color: var(--accent);
+  }
+
+  #pluto-phases-widget .ppw-geo-row { display: flex; gap: 0.6rem; }
+  #pluto-phases-widget .ppw-geo-row input { flex: 1; }
+  #pluto-phases-widget button.ppw-geo-btn {
+    flex: 0 0 auto;
+    background: var(--accent);
+    color: var(--bg-0);
+    border: none;
+    padding: 0 1.1rem;
+    border-radius: var(--radius-sm);
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 0.85rem;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+  #pluto-phases-widget button.ppw-geo-btn:hover { filter: brightness(1.1); }
+  #pluto-phases-widget .ppw-geo-status { font-size: 0.82rem; margin-top: 0.4rem; min-height: 1.2em; }
+  #pluto-phases-widget .ppw-geo-status.ppw-ok { color: var(--accent-2); }
+  #pluto-phases-widget .ppw-geo-status.ppw-err { color: #fca5a5; }
+
+  /* Submit button */
+  #pluto-phases-widget .ppw-submit-wrap { text-align: center; margin: 2rem 0 0.5rem; }
+  #pluto-phases-widget button.ppw-seal {
+    position: relative;
+    width: 150px; height: 150px;
+    border-radius: 50%;
+    border: 1px solid var(--card-border);
+    cursor: pointer;
+    background: var(--accent);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+    color: var(--bg-0);
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 0.9rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    transition: transform 0.15s ease, filter 0.15s ease;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.3rem;
+  }
+  #pluto-phases-widget button.ppw-seal:hover:not(:disabled) { transform: scale(1.04); filter: brightness(1.08); }
+  #pluto-phases-widget button.ppw-seal:disabled { opacity: 0.6; cursor: wait; }
+  #pluto-phases-widget .ppw-seal-icon svg { width: 46px; height: 46px; display: block; }
+  #pluto-phases-widget .ppw-seal-icon.ppw-hidden { display: none; }
+  #pluto-phases-widget .ppw-seal-spin { animation: ppw-spin 1.4s linear infinite; }
+  @keyframes ppw-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+  #pluto-phases-widget .ppw-error-box {
+    margin-top: 1rem;
+    padding: 0.85rem 1.1rem;
+    border: 1px solid rgba(239,68,68,.45);
+    background: var(--bg-1);
+    color: #fca5a5;
+    font-size: 0.92rem;
+    border-radius: var(--radius-sm);
+  }
+
+  /* Results */
+  #pluto-phases-widget .ppw-results { margin-top: 2.2rem; animation: ppw-fade-in 0.6s ease; }
+  @keyframes ppw-fade-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+  #pluto-phases-widget .ppw-translate-bar {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 0.6rem;
+    margin-bottom: 1.1rem; font-size: 0.85rem; color: var(--text-lo);
+  }
+  #pluto-phases-widget .ppw-translate-bar label { display: inline; text-transform: none; letter-spacing: 0; font-size: 0.85rem; margin: 0; font-weight: 400; color: var(--text-lo); }
+  #pluto-phases-widget .ppw-translate-bar select {
+    width: auto; font-size: 0.85rem; padding: 0.3rem 0.5rem;
+  }
+  #pluto-phases-widget button#ppw-translate-btn {
+    background: var(--bg-2); color: var(--text-hi); border: 1px solid var(--card-border);
+    padding: 0.35rem 0.85rem; border-radius: var(--radius-sm); font-family: var(--font-display);
+    font-size: 0.82rem; cursor: pointer;
+  }
+  #pluto-phases-widget button#ppw-translate-btn:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+  #pluto-phases-widget button#ppw-translate-btn:disabled { opacity: 0.6; cursor: wait; }
+  #pluto-phases-widget .ppw-translate-status { font-style: normal; font-size: 0.78rem; color: var(--text-faint); }
+
+  #pluto-phases-widget .ppw-results h3 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 1.15rem;
+    color: var(--text-hi);
+    border-bottom: 1px solid var(--card-border);
+    padding-bottom: 0.4rem;
+    margin: 1.6rem 0 0.8rem;
+  }
+  #pluto-phases-widget .ppw-era-banner {
+    text-align: center;
+    font-family: var(--font-display);
+    font-size: 0.98rem;
+    color: var(--text-hi);
+    padding: 0.9rem 1rem;
+    border: 1px solid var(--card-border);
+    background: var(--bg-1);
+    border-radius: var(--radius-sm);
+  }
+  #pluto-phases-widget .ppw-era-banner strong { color: var(--accent); }
+
+  /* Dominant house section */
+  #pluto-phases-widget .ppw-house-dominant {
+    margin-top: 1.4rem;
+    padding: 1.4rem 1.4rem 1.6rem;
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius);
+    background: var(--bg-1);
+  }
+  #pluto-phases-widget .ppw-house-dominant > h3 {
+    text-align: center;
+    border-bottom: none;
+    font-size: 1.3rem;
+    margin: 0 0 0.3rem;
+  }
+  #pluto-phases-widget .ppw-house-dominant > .ppw-house-lede {
+    text-align: center;
+    color: var(--text-lo);
+    margin: 0 0 1.3rem;
+    font-size: 0.9rem;
+  }
+  #pluto-phases-widget .ppw-house-card {
+    border-top: 1px solid var(--card-border);
+    padding-top: 1.1rem;
+    margin-top: 1.1rem;
+  }
+  #pluto-phases-widget .ppw-house-card:first-of-type { border-top: none; padding-top: 0; margin-top: 0; }
+  #pluto-phases-widget .ppw-house-card h4 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--accent-2);
+    margin: 0 0 0.15rem;
+  }
+  #pluto-phases-widget .ppw-house-card .ppw-house-sign {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 1.35rem;
+    color: var(--text-hi);
+    display: block;
+    margin-bottom: 0.2rem;
+  }
+  #pluto-phases-widget .ppw-house-card .ppw-house-set {
+    display: block;
+    font-size: 0.72rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    font-weight: 600;
+    margin-bottom: 0.6rem;
+  }
+  #pluto-phases-widget .ppw-house-card p.ppw-house-content { margin: 0; font-size: 0.95rem; color: var(--text-lo); }
+  #pluto-phases-widget .ppw-house-card-primary {
+    padding: 1rem 1.2rem;
+    border: 1px solid var(--accent);
+    border-radius: var(--radius-sm);
+    background: var(--bg-2);
+  }
+  #pluto-phases-widget .ppw-house-card-primary h4 { font-size: 1rem; color: var(--accent); }
+  #pluto-phases-widget .ppw-house-card-primary .ppw-house-sign { font-size: 1.5rem; }
+  #pluto-phases-widget .ppw-house-card-primary p.ppw-house-content { font-size: 0.98rem; line-height: 1.65; color: var(--text-hi); }
+
+  #pluto-phases-widget .ppw-fallback-note {
+    font-size: 0.82rem;
+    font-style: normal;
+    color: var(--text-faint);
+    margin-top: 0.5rem;
+  }
+  #pluto-phases-widget .ppw-hit-card {
+    border: 1px solid var(--card-border);
+    background: var(--bg-1);
+    padding: 0.95rem 1.1rem;
+    border-radius: var(--radius-sm);
+    margin-bottom: 0.9rem;
+  }
+  #pluto-phases-widget .ppw-hit-head { font-weight: 700; margin-bottom: 0.4rem; color: var(--text-hi); font-size: 0.95rem; }
+  #pluto-phases-widget .ppw-hit-window { font-size: 0.78rem; color: var(--text-faint); font-style: normal; margin-bottom: 0.5rem; }
+  #pluto-phases-widget .ppw-hit-text { font-size: 0.92rem; color: var(--text-lo); }
+  #pluto-phases-widget .ppw-hit-text.ppw-clamped { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+  #pluto-phases-widget button.ppw-expand {
+    background: none; border: none; color: var(--accent);
+    font-family: var(--font-display);
+    cursor: pointer; padding: 0.3rem 0; font-size: 0.82rem; text-decoration: underline;
+  }
+
+  /* Offers */
+  #pluto-phases-widget .ppw-offers {
+    margin-top: 2.4rem;
+    padding: 1.7rem 1.5rem;
+    background: var(--bg-2);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius);
+    position: relative;
+  }
+  #pluto-phases-widget .ppw-offers h3 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 1.2rem;
+    color: var(--accent);
+    text-align: center;
+    margin: 0.3rem 0 0.3rem;
+    border: none;
+  }
+  #pluto-phases-widget .ppw-offers > p.ppw-offers-lede {
+    text-align: center; max-width: 520px; margin: 0 auto 1.4rem;
+    color: var(--text-lo); font-size: 0.9rem;
+  }
+  #pluto-phases-widget .ppw-offer-list { display: flex; flex-direction: column; gap: 0.8rem; margin-bottom: 1.5rem; }
+  #pluto-phases-widget .ppw-offers-email { max-width: 360px; margin: 0 auto 1.3rem; }
+  #pluto-phases-widget .ppw-offers-email label {
+    color: var(--text-lo); text-transform: none; letter-spacing: 0; font-size: 0.85rem; text-align: center; font-weight: 400;
+  }
+  #pluto-phases-widget .ppw-offers-email input {
+    background: var(--bg-1); border: 1px solid var(--card-border);
+  }
+  #pluto-phases-widget .ppw-offer-item {
+    display: flex; gap: 0.8rem; align-items: flex-start;
+    padding: 0.85rem 1rem;
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-sm);
+    background: var(--bg-1);
+  }
+  #pluto-phases-widget .ppw-offer-item input[type="checkbox"] { margin-top: 0.3rem; }
+  #pluto-phases-widget .ppw-offer-item label { text-transform: none; letter-spacing: 0; color: var(--text-hi); margin: 0; cursor: pointer; font-weight: 400; }
+  #pluto-phases-widget .ppw-offer-item .ppw-offer-title {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 1rem; color: var(--accent); display: block; margin-bottom: 0.2rem;
+  }
+  #pluto-phases-widget .ppw-offer-item .ppw-offer-price { color: var(--accent); font-weight: 700; }
+  #pluto-phases-widget .ppw-offer-item .ppw-offer-desc { font-size: 0.85rem; color: var(--text-lo); display: block; margin-top: 0.15rem; }
+  #pluto-phases-widget .ppw-offers-submit-wrap { text-align: center; }
+  #pluto-phases-widget button.ppw-offers-btn {
+    background: var(--accent);
+    color: var(--bg-0);
+    font-family: var(--font-display);
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    font-size: 0.92rem;
+    border: none;
+    padding: 0.75rem 1.7rem;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+  }
+  #pluto-phases-widget button.ppw-offers-btn:hover { filter: brightness(1.1); }
+  #pluto-phases-widget button.ppw-offers-btn:disabled { opacity: 0.6; cursor: wait; }
+  #pluto-phases-widget .ppw-offers-status { text-align: center; font-size: 0.82rem; margin-top: 0.85rem; color: var(--text-lo); min-height: 1.2em; }
+  #pluto-phases-widget .ppw-offers-links { display: flex; flex-direction: column; gap: 0.55rem; align-items: center; margin-top: 0.9rem; }
+  #pluto-phases-widget a.ppw-cta-btn {
+    display: inline-block;
+    background: var(--accent);
+    color: var(--bg-0);
+    font-family: var(--font-display);
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    text-decoration: none;
+    padding: 0.65rem 1.4rem;
+    border-radius: var(--radius-sm);
+  }
+  #pluto-phases-widget a.ppw-cta-btn:hover { filter: brightness(1.1); }
+
+  @media (max-width: 560px) {
+    html { font-size: 17px; }
+    #pluto-phases-widget button.ppw-seal { width: 130px; height: 130px; }
+    #pluto-phases-widget h2.ppw-title { font-size: 1.9rem; }
+  }
+</style>
 </head>
 <body data-theme="space">
 
-<div class="app">
+<div id="pluto-phases-widget" class="ppw-root app">
 
-  <header>
-    <div class="title-block">
-      <h1>Pluto Phases Meter</h1>
-    </div>
-    <div class="header-right">
-      <div class="clock-block" id="clockBlock" title="Change now/custom moment">
-        <div class="time" id="clockTime">--:--:--</div>
-        <div class="date" id="clockDate">----‑--‑--</div>
+  <p class="ppw-eyebrow">Pluto Phases</p>
+  <h2 class="ppw-title">What Was Happening?</h2>
+  <p class="ppw-sub">Give us your birth details and one moment from your life. We'll trace the transiting Pluto pattern that was active then &mdash; the same reading system behind the full 75&#8209;page Transit Report.</p>
+
+  <form id="ppw-form">
+    <fieldset>
+      <legend>The Event</legend>
+      <div class="ppw-row">
+        <div class="ppw-field">
+          <label for="ppw-event-date">Event date</label>
+          <input type="date" id="ppw-event-date" required min="1940-01-01" max="2060-12-31">
+        </div>
+        <div class="ppw-field ppw-wide">
+          <label for="ppw-event-desc">Briefly, what happened?</label>
+          <textarea id="ppw-event-desc" placeholder="e.g. I got engaged, or I was let go from my job, or I moved abroad..."></textarea>
+        </div>
       </div>
-      <button class="header-refresh-btn" id="headerRefreshBtn" title="Refresh" aria-label="Refresh reading">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+    </fieldset>
+
+    <fieldset>
+      <legend>Your Birth</legend>
+      <div class="ppw-row">
+        <div class="ppw-field">
+          <label for="ppw-birth-date">Birth date</label>
+          <input type="date" id="ppw-birth-date" required min="1940-01-01" max="2060-12-31">
+        </div>
+        <div class="ppw-field">
+          <label for="ppw-birth-time">Birth time</label>
+          <input type="time" id="ppw-birth-time" value="12:00">
+          <div class="ppw-checkbox-row">
+            <input type="checkbox" id="ppw-time-unknown">
+            <label for="ppw-time-unknown" style="margin:0;text-transform:none;letter-spacing:0;">I don't know my exact birth time</label>
+          </div>
+        </div>
+      </div>
+      <div class="ppw-row">
+        <div class="ppw-field ppw-wide">
+          <label for="ppw-place">Birth place (city, country)</label>
+          <div class="ppw-geo-row">
+            <input type="text" id="ppw-place" placeholder="e.g. Kolkata, India" autocomplete="off">
+            <button type="button" class="ppw-geo-btn" id="ppw-geo-btn">Locate</button>
+          </div>
+          <div class="ppw-geo-status" id="ppw-geo-status"></div>
+        </div>
+      </div>
+      <div class="ppw-row">
+        <div class="ppw-field">
+          <label for="ppw-utc-offset">Time zone at birth (UTC offset)</label>
+          <select id="ppw-utc-offset"></select>
+          <div class="ppw-help">The offset in effect at your birth location on that date. If unsure, use your location's standard offset.</div>
+        </div>
+        <div class="ppw-field">
+          <label>Gender</label>
+          <div class="ppw-radio-group" style="margin-top:0.6rem;">
+            <label><input type="radio" name="ppw-gender" value="Male" checked> Male</label>
+            <label><input type="radio" name="ppw-gender" value="Female"> Female</label>
+          </div>
+        </div>
+      </div>
+    </fieldset>
+
+    <div class="ppw-submit-wrap">
+      <button type="submit" class="ppw-seal" id="ppw-submit">
+        <span class="ppw-seal-icon" id="ppw-icon-idle">
+          <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M4 40 C 12 20, 20 20, 26 32 S 40 44, 46 24 S 56 12, 60 24" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
+            <text x="32" y="52" text-anchor="middle" font-size="20" fill="currentColor" font-family="Georgia, serif">&#9799;</text>
+          </svg>
+        </span>
+        <span class="ppw-seal-icon ppw-hidden" id="ppw-icon-loading">
+          <svg class="ppw-seal-spin" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="32" cy="32" r="24" stroke="currentColor" stroke-width="3" stroke-dasharray="38 100" stroke-linecap="round"/>
+          </svg>
+        </span>
+        Reveal
       </button>
     </div>
-  </header>
+    <div id="ppw-error" style="display:none;" class="ppw-error-box"></div>
+  </form>
 
-  <div class="collapsible-panel" id="momentPanel">
-    <div class="datemode-toggle" id="dateModeToggle">
-      <button class="toggle-btn active" data-mode="now">Now (live)</button>
-      <button class="toggle-btn" data-mode="custom">Custom</button>
-    </div>
-    <input type="datetime-local" id="customDateInput" min="2017-01-01T00:00" max="2032-12-31T23:59" style="display:none;">
-  </div>
-
-  <div class="meter-card">
-    <div class="meter-pct" id="pctDisplay">--%</div>
-    <div class="meter-status" id="statusText">Reading the current moment…</div>
-    <div class="meter-track">
-      <div class="meter-fill" id="meterFill"></div>
-      <div class="meter-marker" style="left:30%"></div>
-      <div class="meter-marker" style="left:70%"></div>
-    </div>
-    <div class="meter-scale"><span>0</span><span>30</span><span>70</span><span>100</span></div>
-    <div class="out-of-range" id="outOfRange">This date falls outside 2017–2032 — the meter can't read it.</div>
-  </div>
-
-  <div class="zodiac-card">
-    <div class="gender-row" id="genderToggle">
-      <button class="toggle-btn active" data-gender="male">Male</button>
-      <button class="toggle-btn" data-gender="female">Female</button>
-    </div>
-    <div class="hint-box" id="genderHint">Use your Sun sign</div>
-    <div class="zodiac-row" id="zodiacRow"></div>
-  </div>
-
-  <div class="collapsible-panel" id="themePanel">
-    <div class="theme-grid" id="themeGrid"></div>
-  </div>
-
-  <div class="breakdown-card">
-    <div class="bd-grid" id="breakdownGrid"></div>
-  </div>
+  <div id="ppw-results"></div>
 
   <footer>
     <a href="disclaimer.html" target="_blank" rel="noopener">Disclaimer</a>
-    <span class="sep">·</span>
+    <span class="sep">&middot;</span>
     <a href="privacy.html" target="_blank" rel="noopener">Privacy Policy</a>
-    <div class="disclaimer-line">For reflection and entertainment purposes only. Not a substitute for professional advice of any kind.</div>
+    <div class="disclaimer-line">For entertainment and personal reflection only &mdash; not scientifically validated, not a predictor of real outcomes, and not a substitute for professional medical, legal, or financial advice.</div>
   </footer>
 
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/astronomy-engine/astronomy.browser.min.js"></script>
-<script src="engine.js" defer></script>
+<script src="pluto-client.js"></script>
+<script>
+(function () {
+  // ---- REQUIRED: your deployed Cloudflare Worker URL (see README.md) ----
+  var WORKER_URL = "https://polished-pine-8d1f.sanjupaison.workers.dev/";
+
+  // ---- JotForm lead-capture form (Report / Consultation requests) ----
+  // Form: https://form.jotform.com/262381784349064
+  // All fields (Birth Date, Birth Time, Birth Place, Gender, Email,
+  // Which service) were created together in a single form-creation pass,
+  // and their prefill parameter names were confirmed working end-to-end
+  // by direct testing. If you ever rebuild this form from scratch, note
+  // that JotForm's prefill key is the field's "name" property exactly as
+  // shown in that form's own page-source metadata (the
+  // JotForm.paymentExtrasOnTheFly(...) line) -- not the qid you might
+  // guess, and not the rendered <input name="..."> attribute either,
+  // which can differ from the real prefill key.
+  var JOTFORM_ID = "262381784349064";
+  var JOTFORM_FIELDS = {
+    birthDateMonth: "q2_datetime0[month]",
+    birthDateDay: "q2_datetime0[day]",
+    birthDateYear: "q2_datetime0[year]",
+    birthTimeInput: "q3_time1[timeInput]",
+    birthTimeAmpm: "q3_time1[ampm]",
+    birthPlace: "q4_textbox2",
+    gender: "q5_radio3",
+    email: "q6_email4",
+    service: "q7_checkbox5"
+  };
+
+  var OFFERS = {
+    report: { title: "Pluto Phases Transit Report", price: "$60" },
+    consultation: { title: "Consultation / General Reading", price: "$60" },
+    kindle: {
+      title: "Kindle eBooks",
+      price: "$2+",
+      url: "https://www.amazon.in/Kindle-Store-Sanju-Paison/s?rh=n%3A1571277031%2Cp_27%3ASanju%2BPaison"
+    }
+  };
+
+  var form = document.getElementById("ppw-form");
+  var resultsEl = document.getElementById("ppw-results");
+  var errorEl = document.getElementById("ppw-error");
+  var submitBtn = document.getElementById("ppw-submit");
+  var iconIdle = document.getElementById("ppw-icon-idle");
+  var iconLoading = document.getElementById("ppw-icon-loading");
+  var geoBtn = document.getElementById("ppw-geo-btn");
+  var geoStatus = document.getElementById("ppw-geo-status");
+  var timeUnknownBox = document.getElementById("ppw-time-unknown");
+  var timeInput = document.getElementById("ppw-birth-time");
+  var utcSelect = document.getElementById("ppw-utc-offset");
+
+  var resolvedLat = null, resolvedLon = null, resolvedPlaceName = null;
+  var lastInput = null, lastResult = null;
+
+  var OFFSETS = [-12,-11,-10,-9.5,-9,-8,-7,-6,-5,-4.5,-4,-3.5,-3,-2,-1,0,1,2,3,3.5,4,4.5,5,5.5,5.75,6,6.5,7,8,8.75,9,9.5,10,10.5,11,12,12.75,13,14];
+  OFFSETS.forEach(function (o) {
+    var opt = document.createElement("option");
+    opt.value = o;
+    var sign = o >= 0 ? "+" : "";
+    opt.textContent = "UTC" + sign + o;
+    if (o === 5.5) opt.selected = true;
+    utcSelect.appendChild(opt);
+  });
+
+  timeUnknownBox.addEventListener("change", function () {
+    timeInput.disabled = timeUnknownBox.checked;
+    if (timeUnknownBox.checked) timeInput.value = "12:00";
+  });
+
+  geoBtn.addEventListener("click", function () {
+    var place = document.getElementById("ppw-place").value.trim();
+    if (!place) { geoStatus.textContent = "Enter a place first."; geoStatus.className = "ppw-geo-status ppw-err"; return; }
+    geoStatus.textContent = "Searching...";
+    geoStatus.className = "ppw-geo-status";
+    window.PlutoPhasesClient.geocodePlace(place).then(function (loc) {
+      resolvedLat = loc.latitude; resolvedLon = loc.longitude; resolvedPlaceName = loc.displayName;
+      geoStatus.textContent = "Found: " + loc.displayName + " (" + loc.latitude.toFixed(3) + ", " + loc.longitude.toFixed(3) + ")";
+      geoStatus.className = "ppw-geo-status ppw-ok";
+    }).catch(function (err) {
+      resolvedLat = null; resolvedLon = null; resolvedPlaceName = null;
+      geoStatus.textContent = err.message || "Could not find that place.";
+      geoStatus.className = "ppw-geo-status ppw-err";
+    });
+  });
+
+  function showError(msg) { errorEl.textContent = msg; errorEl.style.display = "block"; }
+  function clearError() { errorEl.style.display = "none"; errorEl.textContent = ""; }
+  function fmtDate(d) { return d.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" }); }
+  function setBusy(busy) {
+    submitBtn.disabled = busy;
+    iconIdle.classList.toggle("ppw-hidden", busy);
+    iconLoading.classList.toggle("ppw-hidden", !busy);
+  }
+
+  function renderResults(r) {
+    var html = "";
+    html += '<div class="ppw-translate-bar">' +
+      '<label for="ppw-lang-select">Translate this reading:</label>' +
+      '<select id="ppw-lang-select">' +
+      '<option value="en">English (original)</option>' +
+      '<option value="es">Spanish</option>' +
+      '<option value="fr">French</option>' +
+      '<option value="de">German</option>' +
+      '<option value="pt">Portuguese</option>' +
+      '<option value="it">Italian</option>' +
+      '<option value="hi">Hindi</option>' +
+      '<option value="ar">Arabic</option>' +
+      '<option value="zh">Chinese (Simplified)</option>' +
+      '</select>' +
+      '<button type="button" id="ppw-translate-btn">Translate</button>' +
+      '<span class="ppw-translate-status" id="ppw-translate-status"></span>' +
+      '</div>';
+
+    html += '<h3 class="ppw-i18n">The Era You Were In</h3>';
+    html += '<div class="ppw-era-banner ppw-i18n">On ' + fmtDate(r.eventDate) + ', you were living through the <strong>' +
+      r.era.sign + ' Pluto Phase</strong> (' + r.era.startYear + '&ndash;' + r.era.endYear + ').</div>';
+
+    html += '<div class="ppw-house-dominant">';
+    html += '<h3 class="ppw-i18n">Your Core Pattern</h3>';
+    html += '<p class="ppw-house-lede ppw-i18n">This is the heart of your reading &mdash; drawn directly from the Pluto Phases system\u2019s own themes for this era, stated plainly rather than softened.</p>';
+    html += '<div class="ppw-house-card ppw-house-card-primary">' +
+      '<h4 class="ppw-i18n">Your Everyday Identity</h4>' +
+      '<span class="ppw-house-sign">' + r.housesContent.first.sign + ' in the 1st House</span>' +
+      '<span class="ppw-house-set">Set ' + r.housesContent.first.setLetter + ' &middot; Number ' + r.housesContent.first.number +
+        ' &middot; ' + r.housesContent.first.color.charAt(0).toUpperCase() + r.housesContent.first.color.slice(1) +
+        ' &middot; ' + r.housesContent.first.keywords.join(", ") + '</span>' +
+      '<p class="ppw-house-content ppw-i18n">' + r.housesContent.first.content + '</p>' +
+      '</div>';
+    html += '<div class="ppw-house-card">' +
+      '<h4 class="ppw-i18n">Your Career &amp; Public Life</h4>' +
+      '<span class="ppw-house-sign">' + r.housesContent.tenth.sign + ' in the 10th House</span>' +
+      '<span class="ppw-house-set">Set ' + r.housesContent.tenth.setLetter + ' &middot; Number ' + r.housesContent.tenth.number +
+        ' &middot; ' + r.housesContent.tenth.color.charAt(0).toUpperCase() + r.housesContent.tenth.color.slice(1) +
+        ' &middot; ' + r.housesContent.tenth.keywords.join(", ") + '</span>' +
+      '<p class="ppw-house-content ppw-i18n">' + r.housesContent.tenth.content + '</p>' +
+      '</div>';
+    html += '</div>';
+
+    html += '<h3 class="ppw-i18n">What Was Active That Day</h3>';
+    if (r.usedFallback) {
+      html += '<p class="ppw-fallback-note ppw-i18n">No aspect window fell exactly on this date &mdash; showing the nearest exact hits instead.</p>';
+    }
+    r.hits.forEach(function (h, i) {
+      var uid = "ppw-hit-" + i;
+      html += '<div class="ppw-hit-card">';
+      html += '<div class="ppw-hit-head ppw-i18n">' + fmtDate(h.date) + ' &mdash; Pluto&minus;135&deg; ' + h.aspectLabel + ' natal ' + h.natalPointName + '</div>';
+      html += '<div class="ppw-hit-window ppw-i18n">Active window: ' + fmtDate(h.windowStartDate) + ' to ' + fmtDate(h.windowEndDate) +
+        ' (may shift roughly &plusmn;' + h.uncertaintyDays + ' days due to birth-time precision)</div>';
+      html += '<div class="ppw-hit-text ppw-clamped ppw-i18n" id="' + uid + '">' + h.interpretation + '</div>';
+      html += '<button type="button" class="ppw-expand" data-target="' + uid + '">Read the full reading</button>';
+      html += '</div>';
+    });
+
+    html += renderOffersHtml();
+
+    resultsEl.innerHTML = html;
+
+    resultsEl.querySelectorAll(".ppw-expand").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var target = document.getElementById(btn.getAttribute("data-target"));
+        target.classList.toggle("ppw-clamped");
+        btn.textContent = target.classList.contains("ppw-clamped") ? "Read the full reading" : "Show less";
+      });
+    });
+
+    wireOffers();
+    wireTranslate();
+    resultsEl.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  // ============================================================
+  // Translation (MyMemory API — free, no key, best-effort machine
+  // translation of the OUTPUT reading only; the form itself stays in
+  // English). Long text is split on sentence boundaries into ~450-char
+  // chunks since MyMemory's free anonymous tier caps request length.
+  // ============================================================
+  function chunkText(text, maxLen) {
+    var sentences = text.split(/(?<=[.!?])\s+/);
+    var chunks = [];
+    var current = "";
+    sentences.forEach(function (s) {
+      if ((current + " " + s).trim().length > maxLen && current) {
+        chunks.push(current.trim());
+        current = s;
+      } else {
+        current = (current + " " + s).trim();
+      }
+    });
+    if (current) chunks.push(current);
+    return chunks.length ? chunks : [text];
+  }
+  function myMemoryTranslate(text, targetLang) {
+    var url = "https://api.mymemory.translated.net/get?q=" + encodeURIComponent(text) + "&langpair=en|" + targetLang;
+    return fetch(url).then(function (r) { return r.json(); }).then(function (data) {
+      if (data && data.responseData && data.responseData.translatedText) {
+        return data.responseData.translatedText;
+      }
+      throw new Error("Translation failed");
+    });
+  }
+  function translateLongText(text, targetLang) {
+    var chunks = chunkText(text, 450);
+    return chunks.reduce(function (chain, chunk) {
+      return chain.then(function (acc) {
+        return myMemoryTranslate(chunk, targetLang).then(function (t) { return acc.concat([t]); });
+      });
+    }, Promise.resolve([])).then(function (parts) { return parts.join(" "); });
+  }
+
+  function wireTranslate() {
+    var select = document.getElementById("ppw-lang-select");
+    var btn = document.getElementById("ppw-translate-btn");
+    var status = document.getElementById("ppw-translate-status");
+    btn.addEventListener("click", function () {
+      var lang = select.value;
+      var elements = resultsEl.querySelectorAll(".ppw-i18n");
+      if (lang === "en") {
+        elements.forEach(function (el) {
+          if (el.dataset.ppwOriginal !== undefined) el.innerHTML = el.dataset.ppwOriginal;
+        });
+        status.textContent = "";
+        return;
+      }
+      btn.disabled = true;
+      status.textContent = "Translating\u2026";
+      var jobs = [];
+      elements.forEach(function (el) {
+        if (el.dataset.ppwOriginal === undefined) el.dataset.ppwOriginal = el.innerHTML;
+        jobs.push(
+          translateLongText(el.textContent, lang).then(function (translated) {
+            el.textContent = translated;
+          }).catch(function () { /* leave this element untranslated on failure */ })
+        );
+      });
+      Promise.all(jobs).then(function () {
+        status.textContent = "Translated (machine translation \u2014 quality may vary).";
+      }).then(function () {
+        btn.disabled = false;
+      });
+    });
+  }
+
+  function renderOffersHtml() {
+    var html = '<div class="ppw-offers">';
+    html += '<h3>Go Deeper</h3>';
+    html += '<p class="ppw-offers-lede">This page traced one moment. Your full chart holds dozens more &mdash; here\'s how to explore the rest with Sanju Paison.</p>';
+    html += '<div class="ppw-offer-list">';
+    html += offerItemHtml("report", OFFERS.report.title, OFFERS.report.price,
+      "The full 75-page report mapping 60 years of your major turning points, transit dates, timelines, and guidance.");
+    html += offerItemHtml("consultation", OFFERS.consultation.title, OFFERS.consultation.price,
+      "A 30-minute live chat with Sanju Paison to talk through where you are and what's ahead.");
+    html += offerItemHtml("kindle", OFFERS.kindle.title, OFFERS.kindle.price,
+      "12 titles covering Pluto Phases, location astrology, compatibility, and an astrology short story \u2014 available now on Amazon.");
+    html += '</div>';
+    html += '<div class="ppw-offers-email" id="ppw-offers-email-wrap">' +
+      '<label for="ppw-offers-email">Email (needed for Report or Consultation requests)</label>' +
+      '<input type="email" id="ppw-offers-email" placeholder="you@example.com">' +
+      '</div>';
+    html += '<div class="ppw-offers-submit-wrap">' +
+      '<button type="button" class="ppw-offers-btn" id="ppw-offers-btn">Continue</button>' +
+      '<div class="ppw-offers-status" id="ppw-offers-status"></div>' +
+      '<div class="ppw-offers-links" id="ppw-offers-links"></div>' +
+      '</div>';
+    html += '</div>';
+    return html;
+  }
+  function offerItemHtml(key, title, price, desc) {
+    return '<div class="ppw-offer-item">' +
+      '<input type="checkbox" id="ppw-offer-' + key + '" value="' + key + '">' +
+      '<label for="ppw-offer-' + key + '"><span class="ppw-offer-title">' + title + ' &mdash; <span class="ppw-offer-price">' + price + '</span></span>' +
+      '<span class="ppw-offer-desc">' + desc + '</span></label>' +
+      '</div>';
+  }
+
+  // Builds a JotForm prefill URL so the visitor arrives with their birth
+  // details, email, and service selection already filled in — they only
+  // need to glance at it and hit Submit on JotForm's own page.
+  function buildJotformUrl(input, email, leadKeys) {
+    var hour24 = input.birthHour;
+    var ampm = hour24 >= 12 ? "PM" : "AM";
+    var hour12 = hour24 % 12;
+    if (hour12 === 0) hour12 = 12;
+
+    var params = [];
+    function add(key, value) { params.push(encodeURIComponent(key) + "=" + encodeURIComponent(value)); }
+
+    var monthStr = input.birthMonth < 10 ? "0" + input.birthMonth : String(input.birthMonth);
+    var dayStr = input.birthDay < 10 ? "0" + input.birthDay : String(input.birthDay);
+    add(JOTFORM_FIELDS.birthDateMonth, monthStr);
+    add(JOTFORM_FIELDS.birthDateDay, dayStr);
+    add(JOTFORM_FIELDS.birthDateYear, input.birthYear);
+    var hourStr = hour12 < 10 ? "0" + hour12 : String(hour12);
+    var minStr = input.birthMinute < 10 ? "0" + input.birthMinute : String(input.birthMinute);
+    add(JOTFORM_FIELDS.birthTimeInput, hourStr + ":" + minStr);
+    add(JOTFORM_FIELDS.birthTimeAmpm, ampm);
+    add(JOTFORM_FIELDS.birthPlace, resolvedPlaceName || (input.latitude + ", " + input.longitude));
+    add(JOTFORM_FIELDS.gender, input.gender);
+    add(JOTFORM_FIELDS.email, email);
+    leadKeys.forEach(function (k) { add(JOTFORM_FIELDS.service, OFFERS[k].title); });
+
+    return "https://form.jotform.com/" + JOTFORM_ID + "?" + params.join("&");
+  }
+
+  function wireOffers() {
+    var btn = document.getElementById("ppw-offers-btn");
+    var status = document.getElementById("ppw-offers-status");
+    var linksEl = document.getElementById("ppw-offers-links");
+    var emailInput = document.getElementById("ppw-offers-email");
+    btn.addEventListener("click", function () {
+      status.textContent = "";
+      linksEl.innerHTML = "";
+
+      var selected = ["report", "consultation", "kindle"].filter(function (k) {
+        return document.getElementById("ppw-offer-" + k).checked;
+      });
+      if (selected.length === 0) {
+        status.textContent = "Select at least one option above first.";
+        return;
+      }
+
+      var leadKeys = selected.filter(function (k) { return k === "report" || k === "consultation"; });
+      var wantsKindle = selected.indexOf("kindle") !== -1;
+
+      // Kindle needs no personal details — show its button immediately,
+      // independent of whether Report/Consultation were also picked.
+      if (wantsKindle) {
+        var a = document.createElement("a");
+        a.className = "ppw-cta-btn";
+        a.href = OFFERS.kindle.url;
+        a.target = "_blank";
+        a.rel = "noopener";
+        a.textContent = "View Kindle eBooks";
+        linksEl.appendChild(a);
+      }
+
+      // Report and/or Consultation: open a pre-filled JotForm with the
+      // visitor's birth details, email, and service selection already in
+      // place — they just review and hit Submit on JotForm's own page.
+      if (leadKeys.length === 0) return;
+
+      var email = (emailInput.value || "").trim();
+      if (!email || email.indexOf("@") === -1) {
+        status.textContent = "Please enter a valid email address for your " +
+          leadKeys.map(function (k) { return OFFERS[k].title; }).join(" + ") + " request.";
+        return;
+      }
+
+      var url = buildJotformUrl(lastInput, email, leadKeys);
+      var jf = document.createElement("a");
+      jf.className = "ppw-cta-btn";
+      jf.href = url;
+      jf.target = "_blank";
+      jf.rel = "noopener";
+      jf.textContent = "Open Your Pre-Filled Request";
+      linksEl.appendChild(jf);
+      status.textContent = "Your details are pre-filled \u2014 just review and hit Submit on the form that opens.";
+      window.open(url, "_blank", "noopener");
+    });
+  }
+
+  form.addEventListener("submit", function (e) {
+    e.preventDefault();
+    clearError();
+    resultsEl.innerHTML = "";
+
+    var birthDateVal = document.getElementById("ppw-birth-date").value;
+    var eventDateVal = document.getElementById("ppw-event-date").value;
+    if (!birthDateVal || !eventDateVal) { showError("Please provide both a birth date and an event date."); return; }
+    if (resolvedLat === null || resolvedLon === null) {
+      showError("Please locate your birth place using the \"Locate\" button before revealing your reading.");
+      return;
+    }
+
+    var timeVal = timeUnknownBox.checked ? "12:00" : (timeInput.value || "12:00");
+    var bParts = birthDateVal.split("-").map(Number);
+    var eParts = eventDateVal.split("-").map(Number);
+    var tParts = timeVal.split(":").map(Number);
+    var gender = document.querySelector('input[name="ppw-gender"]:checked').value;
+    var personPoint = gender === "Male" ? "Sun" : "Moon";
+
+    var input = {
+      birthYear: bParts[0], birthMonth: bParts[1], birthDay: bParts[2],
+      birthHour: tParts[0], birthMinute: tParts[1],
+      birthTimeUnknown: timeUnknownBox.checked,
+      utcOffsetHours: parseFloat(utcSelect.value),
+      latitude: resolvedLat, longitude: resolvedLon,
+      eventYear: eParts[0], eventMonth: eParts[1], eventDay: eParts[2],
+      description: document.getElementById("ppw-event-desc").value || "",
+      personPoint: personPoint, gender: gender,
+      offsetDegrees: 135, orbDegrees: 3
+    };
+
+    setBusy(true);
+    window.PlutoPhasesClient.explainEventViaWorker(input, WORKER_URL).then(function (r) {
+      lastInput = input; lastResult = r;
+      renderResults(r);
+    }).catch(function (err) {
+      if (err && err.rateLimited) {
+        showError(err.message);
+      } else {
+        showError((err && err.message) || "Could not compute a reading right now. Please check your connection and try again.");
+      }
+    }).then(function () {
+      setBusy(false);
+    });
+  });
+})();
+</script>
 </body>
 </html>
