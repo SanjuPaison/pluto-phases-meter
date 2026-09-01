@@ -73,6 +73,35 @@
     </div>
   </div>
 
+  <div class="pm-error" id="pm-error" style="display:none;"></div>
+
+  <!-- overall meter -->
+  <div class="meter-card">
+    <div class="meter-pct" id="pm-pct">--%</div>
+    <div class="meter-status" id="pm-status">Enter both birth times to see a reading</div>
+    <div class="meter-track">
+      <div class="meter-fill" id="pm-fill" style="background:linear-gradient(90deg, var(--accent-2), var(--accent));"></div>
+    </div>
+    <div class="meter-scale"><span>0</span><span>50</span><span>100</span></div>
+  </div>
+
+  <!-- breakdown -->
+  <div class="breakdown-card">
+    <div class="pm-bd-grid">
+      <div class="bd-item" id="pm-bd-1">
+        <div class="bd-num">--</div>
+        <div class="bd-label">He likes her</div>
+        <div class="pm-bd-sub" id="pm-bd-1-sub">Sun &middot; Venus</div>
+      </div>
+      <div class="bd-item" id="pm-bd-2">
+        <div class="bd-num">--</div>
+        <div class="bd-label">She likes him</div>
+        <div class="pm-bd-sub" id="pm-bd-2-sub">Moon &middot; Venus</div>
+      </div>
+    </div>
+    <div class="hint-box" id="pm-hint" style="margin-top:10px;">Fill in both birth times</div>
+  </div>
+
   <!-- birth details -->
   <div class="pm-two-col">
     <div class="zodiac-card">
@@ -120,37 +149,10 @@
     </div>
   </div>
 
-  <div class="pm-error" id="pm-error" style="display:none;"></div>
-
-  <!-- overall meter -->
-  <div class="meter-card">
-    <div class="meter-pct" id="pm-pct">--%</div>
-    <div class="meter-status" id="pm-status">Enter both birth times to see a reading</div>
-    <div class="meter-track">
-      <div class="meter-fill" id="pm-fill" style="background:linear-gradient(90deg, var(--accent-2), var(--accent));"></div>
-    </div>
-    <div class="meter-scale"><span>0</span><span>50</span><span>100</span></div>
-  </div>
-
-  <!-- breakdown -->
-  <div class="breakdown-card">
-    <div class="pm-bd-grid">
-      <div class="bd-item" id="pm-bd-1">
-        <div class="bd-num">--</div>
-        <div class="bd-label">He likes her</div>
-        <div class="pm-bd-sub" id="pm-bd-1-sub">Sun &middot; Venus</div>
-      </div>
-      <div class="bd-item" id="pm-bd-2">
-        <div class="bd-num">--</div>
-        <div class="bd-label">She likes him</div>
-        <div class="pm-bd-sub" id="pm-bd-2-sub">Moon &middot; Venus</div>
-      </div>
-    </div>
-    <div class="hint-box" id="pm-hint" style="margin-top:10px;">Fill in both birth times</div>
-  </div>
-
   <footer>
-    <span>Partner Match</span>
+    <a href="partner-match-disclaimer.html" target="_blank" rel="noopener">Disclaimer</a>
+    <span class="sep">&middot;</span>
+    <a href="partner-match-privacy.html" target="_blank" rel="noopener">Privacy</a>
     <span class="sep">&middot;</span>
     <a href="https://lifeprediction.net" target="_blank" rel="noopener">lifeprediction.net</a>
     <div class="disclaimer-line">For entertainment and personal reflection only. Not a substitute for professional relationship, psychological, or legal advice.</div>
@@ -269,36 +271,32 @@
 
   /* ===================================================================
      Aspect scoring — Conjunct 100, Sextile 50, Square 0, Trine 75,
-     Opposite 0, linearly ramped between each anchor angle.
+     Opposite 0. Each aspect only applies within a 4° orb of its exact
+     angle: match starts at the aspect's base percentage at 0° delta
+     and decreases linearly, degree for degree, to 0% at a 4° delta.
+     Outside every orb (more than 4° from all five angles), the pairing
+     scores a flat 0% — there's no aspect at all to base a score on.
      =================================================================== */
-  var ANCHORS = [
-    { angle: 0,   pct: 100, name: "Conjunction" },
-    { angle: 60,  pct: 50,  name: "Sextile" },
-    { angle: 90,  pct: 0,   name: "Square" },
-    { angle: 120, pct: 75,  name: "Trine" },
-    { angle: 180, pct: 0,   name: "Opposition" }
+  var ORB = 4;
+  var ASPECTS = [
+    { angle: 0,   base: 100, name: "Conjunction" },
+    { angle: 60,  base: 50,  name: "Sextile" },
+    { angle: 90,  base: 0,   name: "Square" },
+    { angle: 120, base: 75,  name: "Trine" },
+    { angle: 180, base: 0,   name: "Opposition" }
   ];
-  // midpoints between anchor angles, used to label a diff with its
-  // nearest named aspect for display purposes
-  var LABEL_BOUNDS = [30, 75, 105, 150];
 
-  function aspectPercent(diff) {
-    for (var i = 0; i < ANCHORS.length - 1; i++) {
-      var a = ANCHORS[i], b = ANCHORS[i + 1];
-      if (diff >= a.angle && diff <= b.angle) {
-        var t = (diff - a.angle) / (b.angle - a.angle);
-        return a.pct + t * (b.pct - a.pct);
+  function aspectResult(diff) {
+    var best = null;
+    ASPECTS.forEach(function (a) {
+      var delta = Math.abs(diff - a.angle);
+      if (delta <= ORB) {
+        var pct = a.base * (1 - delta / ORB);
+        if (!best || pct > best.pct) best = { name: a.name, pct: pct, delta: delta };
       }
-    }
-    return 0;
-  }
-
-  function aspectLabel(diff) {
-    if (diff < LABEL_BOUNDS[0]) return ANCHORS[0].name;
-    if (diff < LABEL_BOUNDS[1]) return ANCHORS[1].name;
-    if (diff < LABEL_BOUNDS[2]) return ANCHORS[2].name;
-    if (diff < LABEL_BOUNDS[3]) return ANCHORS[3].name;
-    return ANCHORS[4].name;
+    });
+    if (!best) return { name: "No aspect", pct: 0, delta: null };
+    return best;
   }
 
   var ASPECT_BLURB = {
@@ -306,7 +304,8 @@
     Sextile: "easy, friendly warmth",
     Square: "friction and tension",
     Trine: "natural, flowing harmony",
-    Opposition: "magnetic but polarizing pull"
+    Opposition: "magnetic but polarizing pull",
+    "No aspect": "no real connection here"
   };
 
   /* ===================================================================
@@ -395,12 +394,14 @@
       var femaleVenus = venusLongitude(jdF);
 
       var diffHeLikesHer = angularDiff(maleSun, femaleVenus);
-      var pctHeLikesHer = aspectPercent(diffHeLikesHer);
-      var labelHeLikesHer = aspectLabel(diffHeLikesHer);
+      var resultHeLikesHer = aspectResult(diffHeLikesHer);
+      var pctHeLikesHer = resultHeLikesHer.pct;
+      var labelHeLikesHer = resultHeLikesHer.name;
 
       var diffSheLikesHim = angularDiff(femaleMoon, maleVenus);
-      var pctSheLikesHim = aspectPercent(diffSheLikesHim);
-      var labelSheLikesHim = aspectLabel(diffSheLikesHim);
+      var resultSheLikesHim = aspectResult(diffSheLikesHim);
+      var pctSheLikesHim = resultSheLikesHim.pct;
+      var labelSheLikesHim = resultSheLikesHim.name;
 
       var overall = Math.round((pctHeLikesHer + pctSheLikesHim) / 2);
 
