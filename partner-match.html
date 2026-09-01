@@ -190,31 +190,53 @@
     var C = (1.914602 - 0.004817 * T - 0.000014 * T * T) * Math.sin(Mr)
       + (0.019993 - 0.000101 * T) * Math.sin(2 * Mr)
       + 0.000289 * Math.sin(3 * Mr);
-    return norm360(L0 + C);
+    var trueLong = L0 + C;
+    // Small nutation + aberration correction for apparent (vs. mean) longitude.
+    var omega = 125.04 - 1934.136 * T;
+    var apparent = trueLong - 0.00569 - 0.00478 * Math.sin(toRad(omega));
+    return norm360(apparent);
   }
 
   function moonLongitude(jd) {
     var T = (jd - 2451545.0) / 36525;
-    var Lp = norm360(218.3164477 + 481267.88123421 * T);
-    var D = norm360(297.8501921 + 445267.1114034 * T);
-    var M = norm360(357.5291092 + 35999.0502909 * T);
-    var Mp = norm360(134.9633964 + 477198.8675055 * T);
-    var F = norm360(93.2720950 + 483202.0175233 * T);
-    var Dr = toRad(D), Mr = toRad(M), Mpr = toRad(Mp), Fr = toRad(F);
-    var dl = 6.289 * Math.sin(Mpr)
-      - 1.274 * Math.sin(2 * Dr - Mpr)
-      + 0.658 * Math.sin(2 * Dr)
-      - 0.186 * Math.sin(Mr)
-      - 0.059 * Math.sin(2 * Dr - 2 * Mpr)
-      - 0.057 * Math.sin(2 * Dr - Mr - Mpr)
-      + 0.053 * Math.sin(2 * Dr + Mpr)
-      + 0.046 * Math.sin(2 * Dr - Mr)
-      + 0.041 * Math.sin(Mpr - Mr)
-      - 0.035 * Math.sin(Dr)
-      - 0.031 * Math.sin(Mpr + Mr)
-      - 0.015 * Math.sin(2 * Fr - 2 * Dr)
-      + 0.011 * Math.sin(Mpr - 4 * Dr);
-    return norm360(Lp + dl);
+    // Moon's mean longitude, mean elongation from Sun, Sun's mean anomaly,
+    // Moon's mean anomaly, Moon's argument of latitude — now carried to T^2.
+    var Lp = norm360(218.3164477 + 481267.88123421 * T - 0.0015786 * T * T);
+    var D  = norm360(297.8501921 + 445267.1114034 * T - 0.0018819 * T * T);
+    var M  = norm360(357.5291092 + 35999.0502909 * T - 0.0001536 * T * T);
+    var Mp = norm360(134.9633964 + 477198.8675055 * T + 0.0087414 * T * T);
+    var F  = norm360(93.2720950 + 483202.0175233 * T - 0.0036539 * T * T);
+
+    // The 25 largest-amplitude longitude terms of the truncated ELP2000/Meeus
+    // lunar theory (same reduced set used by Duffett-Smith's "Practical
+    // Astronomy with your Calculator"), each row [D, M, M', F, amplitude in
+    // millionths of a degree]. This replaces an earlier ~13-term shortcut
+    // that could be off by a couple of degrees on some dates.
+    var MOON_TERMS = [
+      [0, 0, 1, 0, 6288774], [2, 0, -1, 0, 1274027], [2, 0, 0, 0, 658314],
+      [0, 0, 2, 0, 213618], [0, 1, 0, 0, -185116], [0, 0, 0, 2, -114332],
+      [2, 0, -2, 0, 58793], [2, -1, -1, 0, 57066], [2, 0, 1, 0, 53322],
+      [2, -1, 0, 0, 45758], [0, 1, -1, 0, -40923], [1, 0, 0, 0, -34720],
+      [0, 1, 1, 0, -30383], [2, 0, 0, -2, 15327], [0, 0, 1, 2, -12528],
+      [0, 0, 1, -2, 10980], [4, 0, -1, 0, 10675], [0, 0, 3, 0, 10034],
+      [4, 0, -2, 0, 8548], [2, 1, -1, 0, -7888], [2, 1, 0, 0, -6766],
+      [1, 0, -1, 0, -5163], [1, 1, 0, 0, 4987], [2, -1, 1, 0, 4036],
+      [2, 0, 2, 0, 3994]
+    ];
+    var sumL = 0;
+    for (var i = 0; i < MOON_TERMS.length; i++) {
+      var t4 = MOON_TERMS[i];
+      var arg = t4[0] * D + t4[1] * M + t4[2] * Mp + t4[3] * F;
+      sumL += t4[4] * Math.sin(toRad(arg));
+    }
+    var longitude = Lp + sumL / 1000000.0;
+
+    // Dominant nutation-in-longitude term, tied to the Moon's mean node,
+    // for consistency with the correction already applied to the planets.
+    var omegaNode = norm360(125.0445479 - 1934.1362891 * T + 0.0020754 * T * T);
+    var nutationDeg = -17.20 * Math.sin(toRad(omegaNode)) / 3600.0;
+
+    return norm360(longitude + nutationDeg);
   }
 
   var ELEMENTS = {
@@ -271,13 +293,13 @@
 
   /* ===================================================================
      Aspect scoring — Conjunct 100, Sextile 50, Square 0, Trine 75,
-     Opposite 0. Each aspect only applies within a 4° orb of its exact
+     Opposite 0. Each aspect only applies within an 8° orb of its exact
      angle: match starts at the aspect's base percentage at 0° delta
-     and decreases linearly, degree for degree, to 0% at a 4° delta.
-     Outside every orb (more than 4° from all five angles), the pairing
+     and decreases linearly, degree for degree, to 0% at an 8° delta.
+     Outside every orb (more than 8° from all five angles), the pairing
      scores a flat 0% — there's no aspect at all to base a score on.
      =================================================================== */
-  var ORB = 4;
+  var ORB = 8;
   var ASPECTS = [
     { angle: 0,   base: 100, name: "Conjunction" },
     { angle: 60,  base: 50,  name: "Sextile" },
