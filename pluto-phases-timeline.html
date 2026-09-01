@@ -14,16 +14,16 @@
   header{ margin-bottom:10px; }
 
   .intro{
-    font-size:13.5px; line-height:1.6; color:var(--text-lo);
+    font-size:13.5px; line-height:1.6; color:var(--text-hi);
     margin:0 0 14px;
   }
-  .intro strong{ color:var(--text-hi); font-weight:600; }
+  .intro strong{ color:var(--accent); font-weight:600; }
 
   .cycle-toggle{ display:flex; gap:6px; margin-bottom:14px; flex-wrap:wrap; }
-  .cycle-toggle .toggle-btn{ flex:1 1 auto; min-width:110px; font-size:12px; padding:7px 8px; }
+  .cycle-toggle .toggle-btn{ flex:1 1 auto; min-width:110px; font-size:12px; padding:7px 8px; color:var(--text-hi); }
 
   .now-btn{
-    border:1px solid var(--card-border); background:var(--bg-1); color:var(--text-lo);
+    border:1px solid var(--card-border); background:var(--bg-1); color:var(--text-hi);
     border-radius:var(--radius-sm); padding:6px 12px; font-size:12px; font-weight:700;
     cursor:pointer; letter-spacing:.02em;
   }
@@ -41,8 +41,8 @@
     cursor:pointer; padding:0 1px;
   }
   .wave-node .yr{
-    position:absolute; top:-18px; font-family:var(--font-mono); font-size:10.5px; font-weight:600;
-    color:var(--text-lo); white-space:nowrap; left:0;
+    position:absolute; top:-18px; font-family:var(--font-mono); font-size:10.5px; font-weight:700;
+    color:var(--text-hi); white-space:nowrap; left:0;
   }
   .wave-node .bar{
     width:100%; height:100%; display:flex; align-items:center; justify-content:center;
@@ -51,8 +51,8 @@
   }
   .wave-node .bar .glyph{ font-size:17px; line-height:1; color:var(--text-hi); }
   .wave-node .name{
-    position:absolute; bottom:-18px; font-size:9.5px; font-weight:600; letter-spacing:.03em;
-    color:var(--text-lo); text-transform:uppercase; white-space:nowrap; left:50%; transform:translateX(-50%);
+    position:absolute; bottom:-18px; font-size:9.5px; font-weight:700; letter-spacing:.03em;
+    color:var(--text-hi); text-transform:uppercase; white-space:nowrap; left:50%; transform:translateX(-50%);
   }
   .wave-node:hover .bar{ border-color:var(--accent); }
   .wave-node:hover .bar .glyph{ color:var(--text-hi); }
@@ -65,26 +65,26 @@
   .phase-detail{ min-height:70px; padding:14px 14px; }
   .phase-detail .ph-head{ display:flex; align-items:baseline; justify-content:space-between; gap:8px; margin-bottom:8px; flex-wrap:wrap; }
   .phase-detail .ph-title{ font-family:var(--font-display); font-size:18px; font-weight:600; color:var(--text-hi); }
-  .phase-detail .ph-range{ font-family:var(--font-mono); font-size:12px; color:var(--text-lo); }
+  .phase-detail .ph-range{ font-family:var(--font-mono); font-size:12px; color:var(--text-hi); }
   .phase-detail .ph-tag{
     display:inline-block; margin-left:6px; font-size:10px; font-weight:700; letter-spacing:.03em;
     color:var(--bg-0); background:var(--accent); border-radius:5px; padding:2px 7px; text-transform:uppercase;
     vertical-align:middle;
   }
-  .ph-empty{ text-align:center; color:var(--text-faint); font-size:12.5px; padding:14px 8px; }
+  .ph-empty{ text-align:center; color:var(--text-lo); font-size:12.5px; padding:14px 8px; }
   .ph-events{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:6px; }
   .ph-events li{
-    display:flex; gap:8px; align-items:baseline; font-size:12.5px; color:var(--text-lo);
-    border-left:2px solid var(--card-border); padding-left:8px;
+    display:flex; gap:8px; align-items:baseline; font-size:12.5px; color:var(--text-hi);
+    border-left:2px solid var(--accent); padding-left:8px;
   }
-  .ph-events li .ph-year{ font-family:var(--font-mono); font-weight:700; color:var(--text-hi); flex-shrink:0; }
+  .ph-events li .ph-year{ font-family:var(--font-mono); font-weight:700; color:var(--accent); flex-shrink:0; }
 
   .ph-forecast-label{
     font-size:10px; font-weight:700; letter-spacing:.05em; text-transform:uppercase;
     color:var(--accent); margin-bottom:6px; display:block;
   }
   .ph-forecast p{
-    font-size:12.5px; line-height:1.6; color:var(--text-lo); margin:0 0 8px;
+    font-size:12.5px; line-height:1.6; color:var(--text-hi); margin:0 0 8px;
   }
   .ph-forecast p:last-child{ margin-bottom:0; }
 
