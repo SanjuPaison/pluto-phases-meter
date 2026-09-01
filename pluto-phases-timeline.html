@@ -10,80 +10,89 @@
 <link rel="stylesheet" href="https://sanjupaison.github.io/pluto-phases-meter/pluto-style.css">
 
 <style>
-  .app{ max-width:760px; padding:12px; }
-  header{ margin-bottom:8px; }
-  .title-block h1{ font-size:20px; }
+  .app{ max-width:800px; padding:16px; }
+  header{ margin-bottom:10px; }
 
   .intro{
-    font-size:11.5px; line-height:1.5; color:var(--text-lo);
-    margin:0 0 10px;
+    font-size:13.5px; line-height:1.6; color:var(--text-lo);
+    margin:0 0 14px;
   }
   .intro strong{ color:var(--text-hi); font-weight:600; }
 
-  .cycle-toggle{ display:flex; gap:4px; margin-bottom:10px; flex-wrap:wrap; }
-  .cycle-toggle .toggle-btn{ flex:1 1 auto; min-width:96px; font-size:10.5px; padding:5px 6px; }
+  .cycle-toggle{ display:flex; gap:6px; margin-bottom:14px; flex-wrap:wrap; }
+  .cycle-toggle .toggle-btn{ flex:1 1 auto; min-width:110px; font-size:12px; padding:7px 8px; }
 
   .now-btn{
     border:1px solid var(--card-border); background:var(--bg-1); color:var(--text-lo);
-    border-radius:var(--radius-sm); padding:4px 9px; font-size:10.5px; font-weight:700;
+    border-radius:var(--radius-sm); padding:6px 12px; font-size:12px; font-weight:700;
     cursor:pointer; letter-spacing:.02em;
   }
   .now-btn:hover{ border-color:var(--accent); color:var(--accent); }
 
   .wave-wrap{
-    overflow-x:auto; overflow-y:visible; padding:18px 4px 16px;
+    overflow-x:auto; overflow-y:visible; padding:26px 6px 22px;
     background:var(--card); border:1px solid var(--card-border); border-radius:var(--radius-sm);
-    margin-bottom:10px;
+    margin-bottom:14px;
   }
-  .wave-row{ position:relative; display:flex; align-items:stretch; height:38px; }
+  .wave-row{ position:relative; display:flex; align-items:stretch; height:44px; }
 
   .wave-node{
     flex-shrink:0; position:relative; display:flex; flex-direction:column; align-items:center;
     cursor:pointer; padding:0 1px;
   }
   .wave-node .yr{
-    position:absolute; top:-14px; font-family:var(--font-mono); font-size:8px; color:var(--text-faint);
-    white-space:nowrap; left:0;
+    position:absolute; top:-18px; font-family:var(--font-mono); font-size:10.5px; font-weight:600;
+    color:var(--text-lo); white-space:nowrap; left:0;
   }
   .wave-node .bar{
     width:100%; height:100%; display:flex; align-items:center; justify-content:center;
     border-radius:6px; background:var(--bg-1); border:1px solid var(--card-border);
     position:relative; transition:filter .15s, border-color .15s;
   }
-  .wave-node .bar .glyph{ font-size:14px; line-height:1; color:var(--text-lo); }
+  .wave-node .bar .glyph{ font-size:17px; line-height:1; color:var(--text-hi); }
   .wave-node .name{
-    position:absolute; bottom:-14px; font-size:7px; letter-spacing:.03em; color:var(--text-faint);
-    text-transform:uppercase; white-space:nowrap; left:50%; transform:translateX(-50%);
+    position:absolute; bottom:-18px; font-size:9.5px; font-weight:600; letter-spacing:.03em;
+    color:var(--text-lo); text-transform:uppercase; white-space:nowrap; left:50%; transform:translateX(-50%);
   }
   .wave-node:hover .bar{ border-color:var(--accent); }
   .wave-node:hover .bar .glyph{ color:var(--text-hi); }
   .wave-node.active .bar{ background:var(--accent); border-color:var(--accent); }
   .wave-node.active .bar .glyph{ color:var(--bg-0); }
+  .wave-node.active .name{ color:var(--text-hi); }
   .wave-node.current .name{ color:var(--accent); font-weight:700; }
+  .wave-node.current .yr{ color:var(--accent); }
 
-  .phase-detail{ min-height:60px; padding:10px 10px; }
-  .phase-detail .ph-head{ display:flex; align-items:baseline; justify-content:space-between; gap:8px; margin-bottom:6px; flex-wrap:wrap; }
-  .phase-detail .ph-title{ font-family:var(--font-display); font-size:15px; font-weight:600; color:var(--text-hi); }
-  .phase-detail .ph-range{ font-family:var(--font-mono); font-size:10.5px; color:var(--text-lo); }
+  .phase-detail{ min-height:70px; padding:14px 14px; }
+  .phase-detail .ph-head{ display:flex; align-items:baseline; justify-content:space-between; gap:8px; margin-bottom:8px; flex-wrap:wrap; }
+  .phase-detail .ph-title{ font-family:var(--font-display); font-size:18px; font-weight:600; color:var(--text-hi); }
+  .phase-detail .ph-range{ font-family:var(--font-mono); font-size:12px; color:var(--text-lo); }
   .phase-detail .ph-tag{
-    display:inline-block; margin-left:6px; font-size:9px; font-weight:700; letter-spacing:.03em;
-    color:var(--bg-0); background:var(--accent); border-radius:5px; padding:1px 6px; text-transform:uppercase;
+    display:inline-block; margin-left:6px; font-size:10px; font-weight:700; letter-spacing:.03em;
+    color:var(--bg-0); background:var(--accent); border-radius:5px; padding:2px 7px; text-transform:uppercase;
     vertical-align:middle;
   }
-  .ph-empty{ text-align:center; color:var(--text-faint); font-size:11px; padding:10px 6px; }
-  .ph-events{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:4px; }
+  .ph-empty{ text-align:center; color:var(--text-faint); font-size:12.5px; padding:14px 8px; }
+  .ph-events{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:6px; }
   .ph-events li{
-    display:flex; gap:8px; align-items:baseline; font-size:11px; color:var(--text-lo);
+    display:flex; gap:8px; align-items:baseline; font-size:12.5px; color:var(--text-lo);
     border-left:2px solid var(--card-border); padding-left:8px;
   }
   .ph-events li .ph-year{ font-family:var(--font-mono); font-weight:700; color:var(--text-hi); flex-shrink:0; }
 
-  footer{ margin-top:8px; }
-  .disclaimer-line{ font-size:9px; }
+  .ph-forecast-label{
+    font-size:10px; font-weight:700; letter-spacing:.05em; text-transform:uppercase;
+    color:var(--accent); margin-bottom:6px; display:block;
+  }
+  .ph-forecast p{
+    font-size:12.5px; line-height:1.6; color:var(--text-lo); margin:0 0 8px;
+  }
+  .ph-forecast p:last-child{ margin-bottom:0; }
+
+  footer{ margin-top:10px; }
 
   @media (max-width:480px){
-    .wave-wrap{ padding:16px 4px 14px; }
-    .wave-row{ height:32px; }
+    .wave-wrap{ padding:22px 4px 18px; }
+    .wave-row{ height:38px; }
   }
 </style>
 </head>
@@ -127,7 +136,7 @@ const SIGNS = {
   Cancer:'♋', Leo:'♌', Virgo:'♍', Libra:'♎', Scorpio:'♏', Sagittarius:'♐'
 };
 
-function P(sign,start,end,events){ return {sign,start,end,events}; }
+function P(sign,start,end,events,forecast){ return {sign,start,end,events,forecast:forecast||null}; }
 
 const CYCLES = [
 { label:'1137 – 1381', phases:[
@@ -172,7 +181,7 @@ const CYCLES = [
   P('Scorpio',1810,1837,[[1815,"Battle of Waterloo"],[1819,"Bolívar Defeats Spanish"],[1826,"Niépce's First Photograph"],[1833,"Slavery Abolished in British Empire"]]),
   P('Sagittarius',1838,1867,[[1842,"First Anesthetic (Ether)"],[1859,"Darwin's On the Origin of Species"],[1859,"Lenoir's Internal-Combustion Engine"],[1862,"Pasteur's Germ Theory"],[1867,"Karl Marx's Das Kapital"]])
 ]},
-{ label:'1868 – 2082+', phases:[
+{ label:'1868 – 2111', phases:[
   P('Capricorn',1868,1898,[[1876,"Bell Patents Telephone"],[1879,"Edison Invents Electric Light"],[1880,"Europe Colonizes Africa"],[1885,"First Skyscraper"],[1895,"Marconi's Radio"],[1895,"Motion Pictures"]]),
   P('Aquarius',1899,1927,[[1903,"Wright Brothers Fly Airplane"],[1905,"Einstein's Theory of Relativity"],[1913,"U.S. Federal Reserve"],[1914,"World War I"],[1917,"Bolshevik Revolution"],[1927,"Big Bang Theory"]]),
   P('Pisces',1928,1948,[[1928,"Penicillin"],[1929,"Global Depression"],[1939,"World War II"],[1945,"Atomic Bombs Dropped"],[1945,"Computer"],[1946,"United Nations"]]),
@@ -181,10 +190,31 @@ const CYCLES = [
   P('Gemini',1979,1989,[[1980,"Smallpox Eradicated"],[1981,"AIDS"],[1986,"Chernobyl Disaster"],[1989,"Tiananmen Square Protest"],[1989,"Fall of Communism"]]),
   P('Cancer',1990,2002,[[1990,"Gulf War"],[1991,"Soviet Union Breakup"],[1991,"Apartheid Ends"],[1996,"Cloned Sheep Dolly"],[1998,"Google"],[2001,"9/11 Attacks"]]),
   P('Leo',2003,2016,[[2004,"Facebook"],[2004,"Indian Ocean Tsunami"],[2007,"iPhone"],[2008,"Recession"],[2010,"Arab Spring"],[2016,"Brexit"]]),
-  P('Virgo',2017,2032,[]),
-  P('Libra',2033,2054,[]),
-  P('Scorpio',2055,2082,[]),
-  P('Sagittarius',2083,null,[])
+  P('Virgo',2017,2032,[
+    [2017,"#MeToo Movement Goes Global"],
+    [2020,"COVID-19 Pandemic"],
+    [2021,"U.S. Capitol Attack"],
+    [2022,"Russian Invasion of Ukraine"],
+    [2022,"Rise of Generative AI (ChatGPT)"]
+  ]),
+  P('Libra',2033,2054,[],[
+    "Global political and social upheaval will likely center on themes of justice and liberty, echoing historical shifts such as the French Revolution (1789–1799), which spread democratic ideals, and the outlawing of the importation of slaves in the USA in 1807.",
+    "Major technological breakthroughs will focus on networks and communication infrastructure, continuing the pattern seen when Libra (networks) was prominent, leading to the establishment of the first telephone network (1877) and the invention of the wireless radio (1893).",
+    "The phase is associated with the rise of new governing authorities and systems of control, similar to George Washington becoming the first President of the United States in 1789.",
+    "The world may experience large-scale catastrophic events related to the Earth, as Taurus (earth) was in the eighth house (death) during the prior Libra Phase (1543–1566), which saw the deadliest recorded earthquake, the 1556 Shaanxi earthquake."
+  ]),
+  P('Scorpio',2055,2082,[],[
+    "The era will be marked by events characterized by terror, state violence, and intense cruelty, reflecting historical periods like the Oprichnina policy (1565–1572) under Ivan the Terrible, which involved public executions and land confiscation.",
+    "There will be a prominent focus on mystery, secrets, and disappearances, paralleling the mysterious vanishing of the Roanoke Colony between 1587 and 1590.",
+    "Major scientific achievements related to unseen forces or transformation will occur, similar to the discovery of electromagnetic induction by Michael Faraday (1831).",
+    "Themes of mass death and widespread horror connected to pests or water could re-emerge, as the Black Death (1346–1353) occurred during the Scorpio Phase (1321–1349)."
+  ]),
+  P('Sagittarius',2083,2111,[],[
+    "The era is expected to be characterized by large-scale military conflict and severe wars (as a fire sign), reminiscent of the American Civil War (1861–1865), noted as the deadliest military conflict in American history.",
+    "There will be an emphasis on space exploration and conquest, continuing the historical precedent of Alexander the Great conquering vast lands between Greece and India (359–328 BC).",
+    "Major leaps in publishing and the dissemination of knowledge are anticipated, following the trend seen when the printing press was invented by Johannes Gutenberg around 1440 (Sagittarius was the 10th house, achievement).",
+    "Popular culture and events will favor themes of excess, comedy, and eccentricity, paralleling the publication of Don Quixote (1605), which detailed bizarre scenarios like mistaking windmills for giants."
+  ])
 ]}
 ];
 
@@ -199,8 +229,7 @@ function findCurrent(){
   for(let c=0;c<CYCLES.length;c++){
     for(let p=0;p<CYCLES[c].phases.length;p++){
       const ph = CYCLES[c].phases[p];
-      const end = ph.end===null ? 9999 : ph.end;
-      if(TODAY_YEAR>=ph.start && TODAY_YEAR<=end) return {c,p};
+      if(TODAY_YEAR>=ph.start && TODAY_YEAR<=ph.end) return {c,p};
     }
   }
   return {c:CYCLES.length-1,p:0};
@@ -225,8 +254,7 @@ function renderCycle(cycleIdx, autoSelectIdx){
   waveRow.innerHTML='';
 
   phases.forEach((ph,i)=>{
-    const end = ph.end===null ? ph.start+25 : ph.end;
-    const duration = (end - ph.start) + 1;
+    const duration = (ph.end - ph.start) + 1;
     const width = Math.max(duration * PX_PER_YEAR, 30);
 
     const node = document.createElement('div');
@@ -255,15 +283,20 @@ function selectPhase(cycleIdx, phaseIdx){
   [...waveRow.children].forEach((n,i)=> n.classList.toggle('active', i===phaseIdx));
   const ph = CYCLES[cycleIdx].phases[phaseIdx];
   const isCurrent = cycleIdx===CURRENT.c && phaseIdx===CURRENT.p;
-  const rangeText = ph.end===null ? `${ph.start} – onward` : `${ph.start} – ${ph.end}`;
+  const rangeText = `${ph.start} – ${ph.end}`;
 
   let eventsHtml;
   if(ph.events.length){
     eventsHtml = `<ul class="ph-events">` + ph.events.map(([y,t])=>
       `<li><span class="ph-year">${y}</span><span>${t}</span></li>`
     ).join('') + `</ul>`;
+  } else if(ph.forecast){
+    eventsHtml = `<div class="ph-forecast">
+      <span class="ph-forecast-label">Forecast — not yet happened</span>
+      ${ph.forecast.map(p=>`<p>${p}</p>`).join('')}
+    </div>`;
   } else {
-    eventsHtml = `<div class="ph-empty">This phase hasn't happened yet — no events to show.</div>`;
+    eventsHtml = `<div class="ph-empty">No events recorded for this phase yet.</div>`;
   }
 
   phaseDetail.innerHTML = `
