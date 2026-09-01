@@ -14,44 +14,44 @@
   header{ margin-bottom:10px; }
 
   .intro{
-    font-size:13.5px; line-height:1.6; color:var(--text-hi);
+    font-size:14.5px; line-height:1.65; color:var(--text-hi); letter-spacing:1.5px;
     margin:0 0 14px;
   }
   .intro strong{ color:var(--accent); font-weight:600; }
 
   .cycle-toggle{ display:flex; gap:6px; margin-bottom:14px; flex-wrap:wrap; }
-  .cycle-toggle .toggle-btn{ flex:1 1 auto; min-width:110px; font-size:12px; padding:7px 8px; color:var(--text-hi); }
+  .cycle-toggle .toggle-btn{ flex:1 1 auto; min-width:112px; font-size:13px; padding:7px 8px; color:var(--text-hi); letter-spacing:1.5px; }
 
   .now-btn{
     border:1px solid var(--card-border); background:var(--bg-1); color:var(--text-hi);
-    border-radius:var(--radius-sm); padding:6px 12px; font-size:12px; font-weight:700;
-    cursor:pointer; letter-spacing:.02em;
+    border-radius:var(--radius-sm); padding:6px 12px; font-size:13px; font-weight:700;
+    cursor:pointer; letter-spacing:1.5px;
   }
   .now-btn:hover{ border-color:var(--accent); color:var(--accent); }
 
   .wave-wrap{
-    overflow-x:auto; overflow-y:visible; padding:26px 6px 22px;
+    overflow-x:auto; overflow-y:visible; padding:28px 6px 24px;
     background:var(--card); border:1px solid var(--card-border); border-radius:var(--radius-sm);
     margin-bottom:14px;
   }
-  .wave-row{ position:relative; display:flex; align-items:stretch; height:44px; }
+  .wave-row{ position:relative; display:flex; align-items:stretch; height:46px; }
 
   .wave-node{
     flex-shrink:0; position:relative; display:flex; flex-direction:column; align-items:center;
     cursor:pointer; padding:0 1px;
   }
   .wave-node .yr{
-    position:absolute; top:-18px; font-family:var(--font-mono); font-size:10.5px; font-weight:700;
-    color:var(--text-hi); white-space:nowrap; left:0;
+    position:absolute; top:-18px; font-family:var(--font-mono); font-size:11.5px; font-weight:700;
+    color:var(--text-hi); letter-spacing:1.5px; white-space:nowrap; left:0;
   }
   .wave-node .bar{
     width:100%; height:100%; display:flex; align-items:center; justify-content:center;
     border-radius:6px; background:var(--bg-1); border:1px solid var(--card-border);
     position:relative; transition:filter .15s, border-color .15s;
   }
-  .wave-node .bar .glyph{ font-size:17px; line-height:1; color:var(--text-hi); }
+  .wave-node .bar .glyph{ font-size:18px; line-height:1; color:var(--text-hi); }
   .wave-node .name{
-    position:absolute; bottom:-18px; font-size:9.5px; font-weight:700; letter-spacing:.03em;
+    position:absolute; bottom:-18px; font-size:10.5px; font-weight:700; letter-spacing:1.5px;
     color:var(--text-hi); text-transform:uppercase; white-space:nowrap; left:50%; transform:translateX(-50%);
   }
   .wave-node:hover .bar{ border-color:var(--accent); }
@@ -64,27 +64,27 @@
 
   .phase-detail{ min-height:70px; padding:14px 14px; }
   .phase-detail .ph-head{ display:flex; align-items:baseline; justify-content:space-between; gap:8px; margin-bottom:8px; flex-wrap:wrap; }
-  .phase-detail .ph-title{ font-family:var(--font-display); font-size:18px; font-weight:600; color:var(--text-hi); }
-  .phase-detail .ph-range{ font-family:var(--font-mono); font-size:12px; color:var(--text-hi); }
+  .phase-detail .ph-title{ font-family:var(--font-display); font-size:19px; font-weight:600; color:var(--text-hi); letter-spacing:1.5px; }
+  .phase-detail .ph-range{ font-family:var(--font-mono); font-size:13px; color:var(--text-hi); letter-spacing:1.5px; }
   .phase-detail .ph-tag{
-    display:inline-block; margin-left:6px; font-size:10px; font-weight:700; letter-spacing:.03em;
+    display:inline-block; margin-left:6px; font-size:10.5px; font-weight:700; letter-spacing:1.5px;
     color:var(--bg-0); background:var(--accent); border-radius:5px; padding:2px 7px; text-transform:uppercase;
     vertical-align:middle;
   }
-  .ph-empty{ text-align:center; color:var(--text-lo); font-size:12.5px; padding:14px 8px; }
+  .ph-empty{ text-align:center; color:var(--text-lo); font-size:13.5px; letter-spacing:1.5px; padding:14px 8px; }
   .ph-events{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:6px; }
   .ph-events li{
-    display:flex; gap:8px; align-items:baseline; font-size:12.5px; color:var(--text-hi);
+    display:flex; gap:8px; align-items:baseline; font-size:13.5px; color:var(--text-hi); letter-spacing:1.5px;
     border-left:2px solid var(--accent); padding-left:8px;
   }
   .ph-events li .ph-year{ font-family:var(--font-mono); font-weight:700; color:var(--accent); flex-shrink:0; }
 
   .ph-forecast-label{
-    font-size:10px; font-weight:700; letter-spacing:.05em; text-transform:uppercase;
+    font-size:10.5px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase;
     color:var(--accent); margin-bottom:6px; display:block;
   }
   .ph-forecast p{
-    font-size:12.5px; line-height:1.6; color:var(--text-hi); margin:0 0 8px;
+    font-size:13.5px; line-height:1.65; color:var(--text-hi); letter-spacing:1.5px; margin:0 0 8px;
   }
   .ph-forecast p:last-child{ margin-bottom:0; }
 
@@ -235,7 +235,7 @@ function findCurrent(){
   return {c:CYCLES.length-1,p:0};
 }
 const CURRENT = findCurrent();
-const PX_PER_YEAR = 4.6;
+const PX_PER_YEAR = 5;
 
 function buildToggle(activeIdx){
   cycleToggle.innerHTML='';
@@ -255,7 +255,7 @@ function renderCycle(cycleIdx, autoSelectIdx){
 
   phases.forEach((ph,i)=>{
     const duration = (ph.end - ph.start) + 1;
-    const width = Math.max(duration * PX_PER_YEAR, 30);
+    const width = Math.max(duration * PX_PER_YEAR, 34);
 
     const node = document.createElement('div');
     node.className='wave-node';
