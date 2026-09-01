@@ -1,0 +1,448 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Partner Match</title>
+
+<!-- Shared Pluto visual system, per STYLE-GUIDE.md -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://sanjupaison.github.io/pluto-phases-meter/pluto-style.css">
+
+<style>
+  /* ---- widget-specific bits not covered by pluto-style.css ---- */
+  .pm-row{ display:flex; gap:10px; margin-bottom:8px; }
+  .pm-row:last-child{ margin-bottom:0; }
+  .pm-field{ flex:1; min-width:0; }
+  .pm-field label{
+    display:block; font-size:11px; color:var(--text-faint);
+    text-transform:uppercase; letter-spacing:1px; margin-bottom:4px;
+  }
+  .pm-field input[type="date"], .pm-field input[type="time"], .pm-field select{
+    width:100%; font-family:var(--font-mono); font-size:13px; letter-spacing:.3px;
+    padding:8px 10px; border:1px solid var(--card-border); border-radius:var(--radius-sm);
+    background:var(--bg-1); color:var(--text-hi); color-scheme:dark;
+  }
+  .pm-field input:focus, .pm-field select:focus{ outline:2px solid var(--accent); outline-offset:1px; }
+  .pm-person-label{
+    font-size:13px; font-weight:700; letter-spacing:.5px; color:var(--accent);
+    text-transform:uppercase; margin:0 0 10px;
+  }
+  .pm-two-col{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  @media (max-width:420px){ .pm-two-col{ grid-template-columns:1fr; } }
+
+  .pm-bd-grid{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .pm-bd-grid .bd-item{ padding:10px 6px; }
+  .pm-bd-grid .bd-num{ font-size:22px; }
+  .pm-bd-grid .bd-label{ font-size:9.5px; margin-top:4px; }
+  .pm-bd-sub{ font-size:11px; color:var(--text-lo); margin-top:4px; letter-spacing:.2px; }
+
+  .pm-error{
+    margin-top:8px; padding:8px 12px; border-radius:var(--radius-sm); font-size:12.5px;
+    background:var(--bg-1); color:var(--text-lo); border:1px solid var(--card-border); text-align:center;
+  }
+</style>
+</head>
+<body data-theme="space">
+
+<div class="app" id="pm-root">
+
+  <header>
+    <div class="title-block"><h1>Partner Match</h1></div>
+    <div class="header-right">
+      <button type="button" class="header-refresh-btn" id="pm-theme-btn" title="Change theme" aria-label="Change theme">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="13.5" cy="6.5" r="1.2" fill="currentColor" stroke="none"/>
+          <circle cx="17.5" cy="10.5" r="1.2" fill="currentColor" stroke="none"/>
+          <circle cx="8.5" cy="7.5" r="1.2" fill="currentColor" stroke="none"/>
+          <circle cx="6.5" cy="12.5" r="1.2" fill="currentColor" stroke="none"/>
+          <path d="M12 2a10 10 0 1 0 0 20c1.4 0 2-1 2-2 0-.6-.2-1-.5-1.4-.3-.4-.5-.8-.5-1.3 0-1 .8-1.8 1.8-1.8H17a3 3 0 0 0 3-3c0-5.5-3.6-10.5-8-10.5z"/>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- theme picker -->
+  <div class="collapsible-panel" id="pm-theme-panel">
+    <div class="theme-grid">
+      <button type="button" class="theme-swatch" data-theme="space" style="--dot-color:#c084fc" title="Space"></button>
+      <button type="button" class="theme-swatch" data-theme="dashboard" style="--dot-color:#7dd3fc" title="Dashboard"></button>
+      <button type="button" class="theme-swatch" data-theme="celestial" style="--dot-color:#e7c368" title="Celestial"></button>
+      <button type="button" class="theme-swatch" data-theme="synth" style="--dot-color:#ff5fc4" title="Synth"></button>
+    </div>
+  </div>
+
+  <!-- birth details -->
+  <div class="pm-two-col">
+    <div class="zodiac-card">
+      <p class="pm-person-label">Him</p>
+      <div class="pm-row">
+        <div class="pm-field">
+          <label for="pm-m-date">Date</label>
+          <input type="date" id="pm-m-date" min="1900-01-01" max="2060-12-31">
+        </div>
+      </div>
+      <div class="pm-row">
+        <div class="pm-field">
+          <label for="pm-m-time">Time</label>
+          <input type="time" id="pm-m-time">
+        </div>
+      </div>
+      <div class="pm-row">
+        <div class="pm-field">
+          <label for="pm-m-utc">UTC offset</label>
+          <select id="pm-m-utc"></select>
+        </div>
+      </div>
+    </div>
+
+    <div class="zodiac-card">
+      <p class="pm-person-label">Her</p>
+      <div class="pm-row">
+        <div class="pm-field">
+          <label for="pm-f-date">Date</label>
+          <input type="date" id="pm-f-date" min="1900-01-01" max="2060-12-31">
+        </div>
+      </div>
+      <div class="pm-row">
+        <div class="pm-field">
+          <label for="pm-f-time">Time</label>
+          <input type="time" id="pm-f-time">
+        </div>
+      </div>
+      <div class="pm-row">
+        <div class="pm-field">
+          <label for="pm-f-utc">UTC offset</label>
+          <select id="pm-f-utc"></select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="pm-error" id="pm-error" style="display:none;"></div>
+
+  <!-- overall meter -->
+  <div class="meter-card">
+    <div class="meter-pct" id="pm-pct">--%</div>
+    <div class="meter-status" id="pm-status">Enter both birth times to see a reading</div>
+    <div class="meter-track">
+      <div class="meter-fill" id="pm-fill" style="background:linear-gradient(90deg, var(--accent-2), var(--accent));"></div>
+    </div>
+    <div class="meter-scale"><span>0</span><span>50</span><span>100</span></div>
+  </div>
+
+  <!-- breakdown -->
+  <div class="breakdown-card">
+    <div class="pm-bd-grid">
+      <div class="bd-item" id="pm-bd-1">
+        <div class="bd-num">--</div>
+        <div class="bd-label">He likes her</div>
+        <div class="pm-bd-sub" id="pm-bd-1-sub">Sun &middot; Venus</div>
+      </div>
+      <div class="bd-item" id="pm-bd-2">
+        <div class="bd-num">--</div>
+        <div class="bd-label">She likes him</div>
+        <div class="pm-bd-sub" id="pm-bd-2-sub">Moon &middot; Venus</div>
+      </div>
+    </div>
+    <div class="hint-box" id="pm-hint" style="margin-top:10px;">Fill in both birth times</div>
+  </div>
+
+  <footer>
+    <span>Partner Match</span>
+    <span class="sep">&middot;</span>
+    <a href="https://lifeprediction.net" target="_blank" rel="noopener">lifeprediction.net</a>
+    <div class="disclaimer-line">For entertainment and personal reflection only. Not a substitute for professional relationship, psychological, or legal advice.</div>
+  </footer>
+
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ===================================================================
+     Astronomy — same low-precision formulas as astro-engine.js
+     (Julian Day, Sun, Moon, and Venus geocentric ecliptic longitude).
+     Only Sun/Moon/Venus are needed here, so outer planets, the
+     ascendant, and location input are omitted entirely.
+     =================================================================== */
+  function toRad(d){ return d * Math.PI / 180; }
+  function toDeg(r){ return r * 180 / Math.PI; }
+  function norm360(x){ x = x % 360; if (x < 0) x += 360; return x; }
+
+  function julianDay(y, m, d, hourUT) {
+    if (m <= 2) { y -= 1; m += 12; }
+    var A = Math.floor(y / 100);
+    var B = 2 - A + Math.floor(A / 4);
+    var JD0 = Math.floor(365.25 * (y + 4716)) + Math.floor(30.6001 * (m + 1)) + d + B - 1524.5;
+    return JD0 + hourUT / 24;
+  }
+
+  function sunLongitude(jd) {
+    var T = (jd - 2451545.0) / 36525;
+    var L0 = norm360(280.46646 + 36000.76983 * T + 0.0003032 * T * T);
+    var M = norm360(357.52911 + 35999.05029 * T - 0.0001537 * T * T);
+    var Mr = toRad(M);
+    var C = (1.914602 - 0.004817 * T - 0.000014 * T * T) * Math.sin(Mr)
+      + (0.019993 - 0.000101 * T) * Math.sin(2 * Mr)
+      + 0.000289 * Math.sin(3 * Mr);
+    return norm360(L0 + C);
+  }
+
+  function moonLongitude(jd) {
+    var T = (jd - 2451545.0) / 36525;
+    var Lp = norm360(218.3164477 + 481267.88123421 * T);
+    var D = norm360(297.8501921 + 445267.1114034 * T);
+    var M = norm360(357.5291092 + 35999.0502909 * T);
+    var Mp = norm360(134.9633964 + 477198.8675055 * T);
+    var F = norm360(93.2720950 + 483202.0175233 * T);
+    var Dr = toRad(D), Mr = toRad(M), Mpr = toRad(Mp), Fr = toRad(F);
+    var dl = 6.289 * Math.sin(Mpr)
+      - 1.274 * Math.sin(2 * Dr - Mpr)
+      + 0.658 * Math.sin(2 * Dr)
+      - 0.186 * Math.sin(Mr)
+      - 0.059 * Math.sin(2 * Dr - 2 * Mpr)
+      - 0.057 * Math.sin(2 * Dr - Mr - Mpr)
+      + 0.053 * Math.sin(2 * Dr + Mpr)
+      + 0.046 * Math.sin(2 * Dr - Mr)
+      + 0.041 * Math.sin(Mpr - Mr)
+      - 0.035 * Math.sin(Dr)
+      - 0.031 * Math.sin(Mpr + Mr)
+      - 0.015 * Math.sin(2 * Fr - 2 * Dr)
+      + 0.011 * Math.sin(Mpr - 4 * Dr);
+    return norm360(Lp + dl);
+  }
+
+  var ELEMENTS = {
+    venus: { a: [0.72333566, 0.00000390], e: [0.00677672, -0.00004107], I: [3.39467605, -0.00078890], L: [181.97909950, 58517.81538729], peri: [131.60246718, 0.00268329], node: [76.67984255, -0.27769418] },
+    earth: { a: [1.00000261, 0.00000562], e: [0.01671123, -0.00004392], I: [-0.00001531, -0.01294668], L: [100.46457166, 35999.37244981], peri: [102.93768193, 0.32327364], node: [0.0, 0.0] }
+  };
+
+  function keplerSolve(Mdeg, e) {
+    var M = Mdeg % 360; if (M > 180) M -= 360; if (M < -180) M += 360;
+    var Mrad = toRad(M);
+    var E = Mrad;
+    for (var i = 0; i < 12; i++) {
+      var dE = (E - e * Math.sin(E) - Mrad) / (1 - e * Math.cos(E));
+      E -= dE;
+      if (Math.abs(dE) < 1e-9) break;
+    }
+    return E;
+  }
+
+  function heliocentricXYZ(elem, T) {
+    var a = elem.a[0] + elem.a[1] * T;
+    var e = elem.e[0] + elem.e[1] * T;
+    var I = toRad(elem.I[0] + elem.I[1] * T);
+    var L = norm360(elem.L[0] + elem.L[1] * T);
+    var peri = norm360(elem.peri[0] + elem.peri[1] * T);
+    var node = norm360(elem.node[0] + elem.node[1] * T);
+    var w = toRad(norm360(peri - node));
+    var Om = toRad(node);
+    var M = norm360(L - peri);
+    var E = keplerSolve(M, e);
+    var xp = a * (Math.cos(E) - e);
+    var yp = a * Math.sqrt(1 - e * e) * Math.sin(E);
+    var cw = Math.cos(w), sw = Math.sin(w), cO = Math.cos(Om), sO = Math.sin(Om), cI = Math.cos(I), sI = Math.sin(I);
+    var x = (cw * cO - sw * sO * cI) * xp + (-sw * cO - cw * sO * cI) * yp;
+    var y = (cw * sO + sw * cO * cI) * xp + (-sw * sO + cw * cO * cI) * yp;
+    return { x: x, y: y };
+  }
+
+  function venusLongitude(jd) {
+    var T = (jd - 2451545.0) / 36525;
+    var p = heliocentricXYZ(ELEMENTS.venus, T);
+    var e = heliocentricXYZ(ELEMENTS.earth, T);
+    var x = p.x - e.x, y = p.y - e.y;
+    var lon = toDeg(Math.atan2(y, x));
+    lon += 1.3970 * T;
+    return norm360(lon);
+  }
+
+  function angularDiff(a, b) {
+    var d = Math.abs(a - b) % 360;
+    if (d > 180) d = 360 - d;
+    return d;
+  }
+
+  /* ===================================================================
+     Aspect scoring — Conjunct 100, Sextile 50, Square 0, Trine 75,
+     Opposite 0, linearly ramped between each anchor angle.
+     =================================================================== */
+  var ANCHORS = [
+    { angle: 0,   pct: 100, name: "Conjunction" },
+    { angle: 60,  pct: 50,  name: "Sextile" },
+    { angle: 90,  pct: 0,   name: "Square" },
+    { angle: 120, pct: 75,  name: "Trine" },
+    { angle: 180, pct: 0,   name: "Opposition" }
+  ];
+  // midpoints between anchor angles, used to label a diff with its
+  // nearest named aspect for display purposes
+  var LABEL_BOUNDS = [30, 75, 105, 150];
+
+  function aspectPercent(diff) {
+    for (var i = 0; i < ANCHORS.length - 1; i++) {
+      var a = ANCHORS[i], b = ANCHORS[i + 1];
+      if (diff >= a.angle && diff <= b.angle) {
+        var t = (diff - a.angle) / (b.angle - a.angle);
+        return a.pct + t * (b.pct - a.pct);
+      }
+    }
+    return 0;
+  }
+
+  function aspectLabel(diff) {
+    if (diff < LABEL_BOUNDS[0]) return ANCHORS[0].name;
+    if (diff < LABEL_BOUNDS[1]) return ANCHORS[1].name;
+    if (diff < LABEL_BOUNDS[2]) return ANCHORS[2].name;
+    if (diff < LABEL_BOUNDS[3]) return ANCHORS[3].name;
+    return ANCHORS[4].name;
+  }
+
+  var ASPECT_BLURB = {
+    Conjunction: "intense, instant chemistry",
+    Sextile: "easy, friendly warmth",
+    Square: "friction and tension",
+    Trine: "natural, flowing harmony",
+    Opposition: "magnetic but polarizing pull"
+  };
+
+  /* ===================================================================
+     UI wiring
+     =================================================================== */
+  var OFFSETS = [
+    { v: -12, city: "Baker Island" }, { v: -11, city: "Pago Pago" }, { v: -10, city: "Honolulu" },
+    { v: -9.5, city: "Marquesas Islands" }, { v: -9, city: "Anchorage" }, { v: -8, city: "Los Angeles" },
+    { v: -7, city: "Denver" }, { v: -6, city: "Chicago" }, { v: -5, city: "New York" },
+    { v: -4.5, city: "Caracas (historic)" }, { v: -4, city: "Santiago" }, { v: -3.5, city: "St. John's" },
+    { v: -3, city: "S\u00e3o Paulo" }, { v: -2, city: "South Georgia" }, { v: -1, city: "Azores" },
+    { v: 0, city: "London" }, { v: 1, city: "Paris" }, { v: 2, city: "Cairo" }, { v: 3, city: "Istanbul" },
+    { v: 3.5, city: "Tehran" }, { v: 4, city: "Dubai" }, { v: 4.5, city: "Kabul" }, { v: 5, city: "Karachi" },
+    { v: 5.5, city: "Delhi" }, { v: 5.75, city: "Kathmandu" }, { v: 6, city: "Dhaka" }, { v: 6.5, city: "Yangon" },
+    { v: 7, city: "Bangkok" }, { v: 8, city: "Hong Kong" }, { v: 8.75, city: "Eucla" }, { v: 9, city: "Tokyo" },
+    { v: 9.5, city: "Adelaide" }, { v: 10, city: "Sydney" }, { v: 10.5, city: "Lord Howe Island" },
+    { v: 11, city: "Honiara" }, { v: 12, city: "Auckland" }, { v: 12.75, city: "Chatham Islands" },
+    { v: 13, city: "Apia" }, { v: 14, city: "Kiritimati" }
+  ];
+
+  var mDate = document.getElementById("pm-m-date");
+  var mTime = document.getElementById("pm-m-time");
+  var mUtc = document.getElementById("pm-m-utc");
+  var fDate = document.getElementById("pm-f-date");
+  var fTime = document.getElementById("pm-f-time");
+  var fUtc = document.getElementById("pm-f-utc");
+  var errorEl = document.getElementById("pm-error");
+  var pctEl = document.getElementById("pm-pct");
+  var statusEl = document.getElementById("pm-status");
+  var fillEl = document.getElementById("pm-fill");
+  var bd1 = document.getElementById("pm-bd-1");
+  var bd2 = document.getElementById("pm-bd-2");
+  var bd1sub = document.getElementById("pm-bd-1-sub");
+  var bd2sub = document.getElementById("pm-bd-2-sub");
+  var hintEl = document.getElementById("pm-hint");
+
+  var now = new Date();
+  function pad(n) { return n < 10 ? "0" + n : "" + n; }
+  var todayStr = now.getFullYear() + "-" + pad(now.getMonth() + 1) + "-" + pad(now.getDate());
+  var localOffset = -now.getTimezoneOffset() / 60;
+  var closestOffset = OFFSETS.reduce(function (a, b) {
+    return Math.abs(b.v - localOffset) < Math.abs(a.v - localOffset) ? b : a;
+  }).v;
+
+  [mUtc, fUtc].forEach(function (sel) {
+    OFFSETS.forEach(function (o) {
+      var opt = document.createElement("option");
+      opt.value = o.v;
+      opt.textContent = "UTC" + (o.v >= 0 ? "+" : "") + o.v + " \u2014 " + o.city;
+      if (o.v === closestOffset) opt.selected = true;
+      sel.appendChild(opt);
+    });
+  });
+  mDate.value = todayStr; fDate.value = todayStr;
+  mTime.value = "12:00"; fTime.value = "12:00";
+
+  function showError(msg) { errorEl.textContent = msg; errorEl.style.display = "block"; }
+  function clearError() { errorEl.style.display = "none"; errorEl.textContent = ""; }
+
+  function jdFor(dateVal, timeVal, utcOffset) {
+    var bParts = dateVal.split("-").map(Number);
+    var tParts = timeVal.split(":").map(Number);
+    var utHour = tParts[0] + tParts[1] / 60 - utcOffset;
+    return julianDay(bParts[0], bParts[1], bParts[2], utHour);
+  }
+
+  function renderBdItem(el, subEl, pct, label, subtext) {
+    el.querySelector(".bd-num").textContent = Math.round(pct);
+    subEl.textContent = subtext + " \u00b7 " + label;
+    el.classList.toggle("penalty", pct < 25);
+  }
+
+  function tryCompute() {
+    clearError();
+    if (!mDate.value || !mTime.value || !fDate.value || !fTime.value) {
+      statusEl.textContent = "Enter both birth times to see a reading";
+      return;
+    }
+    try {
+      var jdM = jdFor(mDate.value, mTime.value, parseFloat(mUtc.value));
+      var jdF = jdFor(fDate.value, fTime.value, parseFloat(fUtc.value));
+
+      var maleSun = sunLongitude(jdM);
+      var maleVenus = venusLongitude(jdM);
+      var femaleMoon = moonLongitude(jdF);
+      var femaleVenus = venusLongitude(jdF);
+
+      var diffHeLikesHer = angularDiff(maleSun, femaleVenus);
+      var pctHeLikesHer = aspectPercent(diffHeLikesHer);
+      var labelHeLikesHer = aspectLabel(diffHeLikesHer);
+
+      var diffSheLikesHim = angularDiff(femaleMoon, maleVenus);
+      var pctSheLikesHim = aspectPercent(diffSheLikesHim);
+      var labelSheLikesHim = aspectLabel(diffSheLikesHim);
+
+      var overall = Math.round((pctHeLikesHer + pctSheLikesHim) / 2);
+
+      pctEl.textContent = overall + "%";
+      fillEl.style.width = overall + "%";
+
+      var statusWord = overall >= 70 ? "Strong mutual pull"
+        : overall >= 40 ? "Mixed, workable signals"
+        : "Real friction to navigate";
+      statusEl.textContent = statusWord;
+
+      renderBdItem(bd1, bd1sub, pctHeLikesHer, labelHeLikesHer, "Sun \u2192 Venus");
+      renderBdItem(bd2, bd2sub, pctSheLikesHim, labelSheLikesHim, "Moon \u2192 Venus");
+
+      hintEl.textContent = "Him: " + ASPECT_BLURB[labelHeLikesHer] + "  \u00b7  Her: " + ASPECT_BLURB[labelSheLikesHim];
+    } catch (err) {
+      showError(err.message || "Something went wrong computing this reading.");
+    }
+  }
+
+  [mDate, mTime, mUtc, fDate, fTime, fUtc].forEach(function (el) {
+    el.addEventListener("change", tryCompute);
+  });
+
+  // theme picker
+  var themeBtn = document.getElementById("pm-theme-btn");
+  var themePanel = document.getElementById("pm-theme-panel");
+  var swatches = document.querySelectorAll(".theme-swatch");
+  themeBtn.addEventListener("click", function () {
+    themePanel.classList.toggle("open");
+  });
+  function setTheme(t) {
+    document.body.setAttribute("data-theme", t);
+    swatches.forEach(function (s) { s.classList.toggle("active", s.getAttribute("data-theme") === t); });
+  }
+  swatches.forEach(function (s) {
+    s.addEventListener("click", function () { setTheme(s.getAttribute("data-theme")); });
+  });
+  setTheme("space");
+
+  tryCompute();
+})();
+</script>
+</body>
+</html>
