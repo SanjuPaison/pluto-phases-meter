@@ -33,7 +33,18 @@
       <button class="toggle-btn active" data-mode="now">Now (live)</button>
       <button class="toggle-btn" data-mode="custom">Custom</button>
     </div>
-    <input type="datetime-local" id="customDateInput" min="2017-01-01T00:00" max="2032-12-31T23:59" style="display:none;">
+    <div id="customDateFields" style="display:none;">
+      <div class="dt-row" style="margin-bottom:6px;">
+        <select id="customMonth"></select>
+        <select id="customDay"></select>
+        <select id="customYear"></select>
+      </div>
+      <div class="dt-row">
+        <select id="customHour"></select>
+        <select id="customMinute"></select>
+        <select id="customAmpm"></select>
+      </div>
+    </div>
   </div>
 
   <div class="meter-card">

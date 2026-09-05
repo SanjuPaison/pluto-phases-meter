@@ -324,6 +324,71 @@ function forceRefresh(btnEl){
   refresh();
 }
 
+var MONTH_NAMES = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+
+function populateCustomDateFields(){
+  var monthSel = document.getElementById("customMonth");
+  var daySel = document.getElementById("customDay");
+  var yearSel = document.getElementById("customYear");
+  var hourSel = document.getElementById("customHour");
+  var minuteSel = document.getElementById("customMinute");
+  var ampmSel = document.getElementById("customAmpm");
+
+  MONTH_NAMES.forEach(function(name, i){
+    var opt = document.createElement("option");
+    opt.value = i+1; opt.textContent = name;
+    monthSel.appendChild(opt);
+  });
+  for(var d=1; d<=31; d++){
+    var opt = document.createElement("option");
+    opt.value = d; opt.textContent = d;
+    daySel.appendChild(opt);
+  }
+  for(var y=MIN_YEAR; y<=MAX_YEAR; y++){
+    var opt = document.createElement("option");
+    opt.value = y; opt.textContent = y;
+    yearSel.appendChild(opt);
+  }
+  for(var h=1; h<=12; h++){
+    var opt = document.createElement("option");
+    opt.value = h; opt.textContent = pad(h);
+    hourSel.appendChild(opt);
+  }
+  for(var m=0; m<=59; m++){
+    var opt = document.createElement("option");
+    opt.value = m; opt.textContent = pad(m);
+    minuteSel.appendChild(opt);
+  }
+  ["AM","PM"].forEach(function(p){
+    var opt = document.createElement("option");
+    opt.value = p; opt.textContent = p;
+    ampmSel.appendChild(opt);
+  });
+
+  // Default to "now" (clamped to the supported range) so the first switch
+  // to Custom starts from a sensible moment rather than blank selects.
+  var n = new Date();
+  monthSel.value = n.getMonth()+1;
+  daySel.value = n.getDate();
+  yearSel.value = Math.min(MAX_YEAR, Math.max(MIN_YEAR, n.getFullYear()));
+  var hour12 = n.getHours()%12; if(hour12===0) hour12 = 12;
+  hourSel.value = hour12;
+  minuteSel.value = n.getMinutes();
+  ampmSel.value = n.getHours()>=12 ? "PM" : "AM";
+}
+
+function readCustomDateFields(){
+  var month = parseInt(document.getElementById("customMonth").value, 10);
+  var day = parseInt(document.getElementById("customDay").value, 10);
+  var year = parseInt(document.getElementById("customYear").value, 10);
+  var hour12 = parseInt(document.getElementById("customHour").value, 10);
+  var minute = parseInt(document.getElementById("customMinute").value, 10);
+  var ampm = document.getElementById("customAmpm").value;
+  var hour24 = hour12 % 12;
+  if(ampm === "PM") hour24 += 12;
+  return new Date(year, month-1, day, hour24, minute);
+}
+
 function wireSettings(){
   document.getElementById("clockBlock").addEventListener("click", function(){
     document.getElementById("momentPanel").classList.toggle("open");
@@ -344,24 +409,22 @@ function wireSettings(){
     Array.prototype.forEach.call(this.children, function(b){ b.classList.remove("active"); });
     btn.classList.add("active");
     state.mode = btn.getAttribute("data-mode");
-    var input = document.getElementById("customDateInput");
+    var fields = document.getElementById("customDateFields");
     if(state.mode==="custom"){
-      input.style.display = "block";
-      if(!input.value){
-        var n = new Date();
-        input.value = n.getFullYear()+"-"+pad(n.getMonth()+1)+"-"+pad(n.getDate())+"T"+pad(n.getHours())+":"+pad(n.getMinutes());
-      }
-      state.customDate = new Date(input.value);
+      fields.style.display = "block";
+      state.customDate = readCustomDateFields();
     } else {
-      input.style.display = "none";
+      fields.style.display = "none";
       state.customDate = null;
     }
     refresh();
   });
 
-  document.getElementById("customDateInput").addEventListener("change", function(){
-    state.customDate = new Date(this.value);
-    refresh();
+  ["customMonth","customDay","customYear","customHour","customMinute","customAmpm"].forEach(function(id){
+    document.getElementById(id).addEventListener("change", function(){
+      state.customDate = readCustomDateFields();
+      refresh();
+    });
   });
 
   document.getElementById("headerRefreshBtn").addEventListener("click", function(){ forceRefresh(this); });
@@ -392,6 +455,7 @@ function watchHeight(){
 function init(){
   buildThemeGrid();
   buildZodiacRow();
+  populateCustomDateFields();
   wireSettings();
   updateGenderHint();
   watchHeight(); // reports our height to the embedding page so it can auto-size the iframe
