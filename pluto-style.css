@@ -138,10 +138,18 @@
     transition:.2s; letter-spacing:.03em;
   }
   .toggle-btn.active{ background:var(--accent); color:var(--bg-0); border-color:var(--accent); }
-  input[type="datetime-local"]{
-    background:var(--bg-1); border:1px solid var(--card-border); color:var(--text-hi);
-    border-radius:var(--radius-sm); padding:8px 10px; font-family:var(--font-mono); font-size:13px;
-    width:100%; color-scheme:dark;
+
+  /* ---- shared date/time select rows -----------------------------------
+     Used in place of native <input type="date"/"time"/"datetime-local">.
+     Those native pickers, combined with color-scheme:dark below, could
+     crash in restrictive in-app-browser WebViews (Instagram/TikTok/etc).
+     Plain <select> elements never invoke a native OS picker overlay, so
+     that whole crash class is structurally avoided. */
+  .dt-row{ display:flex; gap:6px; }
+  .dt-row select{
+    width:100%; font-family:var(--font-mono); font-size:13px;
+    padding:8px 6px; border:1px solid var(--card-border); border-radius:var(--radius-sm);
+    background:var(--bg-1); color:var(--text-hi);
   }
 
   /* ---- meter ---- */
