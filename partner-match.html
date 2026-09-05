@@ -19,12 +19,18 @@
     display:block; font-size:11px; color:var(--text-faint);
     text-transform:uppercase; letter-spacing:1px; margin-bottom:4px;
   }
-  .pm-field input[type="date"], .pm-field input[type="time"], .pm-field select{
+  .pm-field select{
     width:100%; font-family:var(--font-mono); font-size:13px; letter-spacing:.3px;
     padding:8px 10px; border:1px solid var(--card-border); border-radius:var(--radius-sm);
-    background:var(--bg-1); color:var(--text-hi); color-scheme:dark;
+    background:var(--bg-1); color:var(--text-hi);
   }
   .pm-field input:focus, .pm-field select:focus{ outline:2px solid var(--accent); outline-offset:1px; }
+  .pm-dob-row, .pm-tob-row{ display:flex; gap:6px; }
+  .pm-dob-row select, .pm-tob-row select{
+    width:100%; font-family:var(--font-mono); font-size:13px; letter-spacing:.3px;
+    padding:8px 4px; border:1px solid var(--card-border); border-radius:var(--radius-sm);
+    background:var(--bg-1); color:var(--text-hi);
+  }
   .pm-person-label{
     font-size:13px; font-weight:700; letter-spacing:.5px; color:var(--accent);
     text-transform:uppercase; margin:0 0 10px;
@@ -112,14 +118,22 @@
       </div>
       <div class="pm-row">
         <div class="pm-field">
-          <label for="pm-p1-date">Date</label>
-          <input type="date" id="pm-p1-date" min="1900-01-01" max="2060-12-31">
+          <label for="pm-p1-month">Date</label>
+          <div class="pm-dob-row">
+            <select id="pm-p1-month"><option value="" disabled selected>Month</option></select>
+            <select id="pm-p1-day"><option value="" disabled selected>Day</option></select>
+            <select id="pm-p1-year"><option value="" disabled selected>Year</option></select>
+          </div>
         </div>
       </div>
       <div class="pm-row">
         <div class="pm-field">
-          <label for="pm-p1-time">Time</label>
-          <input type="time" id="pm-p1-time">
+          <label for="pm-p1-hour">Time</label>
+          <div class="pm-tob-row">
+            <select id="pm-p1-hour"><option value="" disabled selected>Hour</option></select>
+            <select id="pm-p1-minute"><option value="" disabled selected>Min</option></select>
+            <select id="pm-p1-ampm"><option value="" disabled selected>AM/PM</option></select>
+          </div>
         </div>
       </div>
       <div class="pm-row">
@@ -138,14 +152,22 @@
       </div>
       <div class="pm-row">
         <div class="pm-field">
-          <label for="pm-p2-date">Date</label>
-          <input type="date" id="pm-p2-date" min="1900-01-01" max="2060-12-31">
+          <label for="pm-p2-month">Date</label>
+          <div class="pm-dob-row">
+            <select id="pm-p2-month"><option value="" disabled selected>Month</option></select>
+            <select id="pm-p2-day"><option value="" disabled selected>Day</option></select>
+            <select id="pm-p2-year"><option value="" disabled selected>Year</option></select>
+          </div>
         </div>
       </div>
       <div class="pm-row">
         <div class="pm-field">
-          <label for="pm-p2-time">Time</label>
-          <input type="time" id="pm-p2-time">
+          <label for="pm-p2-hour">Time</label>
+          <div class="pm-tob-row">
+            <select id="pm-p2-hour"><option value="" disabled selected>Hour</option></select>
+            <select id="pm-p2-minute"><option value="" disabled selected>Min</option></select>
+            <select id="pm-p2-ampm"><option value="" disabled selected>AM/PM</option></select>
+          </div>
         </div>
       </div>
       <div class="pm-row">
@@ -383,11 +405,76 @@
     { v: 13, city: "Apia" }, { v: 14, city: "Kiritimati" }
   ];
 
-  var p1Date = document.getElementById("pm-p1-date");
-  var p1Time = document.getElementById("pm-p1-time");
+  function makeDateTimePicker(prefix) {
+    var monthSel = document.getElementById(prefix + "-month");
+    var daySel = document.getElementById(prefix + "-day");
+    var yearSel = document.getElementById(prefix + "-year");
+    var hourSel = document.getElementById(prefix + "-hour");
+    var minSel = document.getElementById(prefix + "-minute");
+    var ampmSel = document.getElementById(prefix + "-ampm");
+
+    var MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+    MONTHS.forEach(function (name, i) {
+      var opt = document.createElement("option");
+      opt.value = i + 1; opt.textContent = name;
+      monthSel.appendChild(opt);
+    });
+    for (var d = 1; d <= 31; d++) {
+      var opt = document.createElement("option");
+      opt.value = d; opt.textContent = d;
+      daySel.appendChild(opt);
+    }
+    for (var y = 2060; y >= 1900; y--) {
+      var opt = document.createElement("option");
+      opt.value = y; opt.textContent = y;
+      yearSel.appendChild(opt);
+    }
+    for (var h = 1; h <= 12; h++) {
+      var opt = document.createElement("option");
+      opt.value = h; opt.textContent = (h < 10 ? "0" + h : h);
+      hourSel.appendChild(opt);
+    }
+    for (var m = 0; m <= 59; m++) {
+      var opt = document.createElement("option");
+      opt.value = m; opt.textContent = (m < 10 ? "0" + m : m);
+      minSel.appendChild(opt);
+    }
+    ["AM", "PM"].forEach(function (p) {
+      var opt = document.createElement("option");
+      opt.value = p; opt.textContent = p;
+      ampmSel.appendChild(opt);
+    });
+
+    return {
+      elements: [monthSel, daySel, yearSel, hourSel, minSel, ampmSel],
+      setDate: function (year, month, day) {
+        yearSel.value = year; monthSel.value = month; daySel.value = day;
+      },
+      setTime: function (hour24, minute) {
+        var hour12 = hour24 % 12; if (hour12 === 0) hour12 = 12;
+        hourSel.value = hour12; minSel.value = minute;
+        ampmSel.value = hour24 >= 12 ? "PM" : "AM";
+      },
+      get dateValue() {
+        if (!monthSel.value || !daySel.value || !yearSel.value) return "";
+        return yearSel.value + "-" + monthSel.value + "-" + daySel.value;
+      },
+      get timeValue() {
+        if (!hourSel.value || !minSel.value || !ampmSel.value) return "";
+        var hour24 = parseInt(hourSel.value, 10) % 12;
+        if (ampmSel.value === "PM") hour24 += 12;
+        return hour24 + ":" + minSel.value;
+      }
+    };
+  }
+
+  var p1Picker = makeDateTimePicker("pm-p1");
+  var p2Picker = makeDateTimePicker("pm-p2");
+  var p1Date = { get value() { return p1Picker.dateValue; } };
+  var p1Time = { get value() { return p1Picker.timeValue; } };
   var p1Utc = document.getElementById("pm-p1-utc");
-  var p2Date = document.getElementById("pm-p2-date");
-  var p2Time = document.getElementById("pm-p2-time");
+  var p2Date = { get value() { return p2Picker.dateValue; } };
+  var p2Time = { get value() { return p2Picker.timeValue; } };
   var p2Utc = document.getElementById("pm-p2-utc");
   var errorEl = document.getElementById("pm-error");
   var pctEl = document.getElementById("pm-pct");
@@ -421,8 +508,10 @@
       sel.appendChild(opt);
     });
   });
-  p1Date.value = todayStr; p2Date.value = todayStr;
-  p1Time.value = "12:00"; p2Time.value = "12:00";
+  p1Picker.setDate(now.getFullYear(), now.getMonth() + 1, now.getDate());
+  p2Picker.setDate(now.getFullYear(), now.getMonth() + 1, now.getDate());
+  p1Picker.setTime(12, 0);
+  p2Picker.setTime(12, 0);
 
   function showError(msg) { errorEl.textContent = msg; errorEl.style.display = "block"; }
   function clearError() { errorEl.style.display = "none"; errorEl.textContent = ""; }
@@ -486,7 +575,7 @@
     }
   }
 
-  [p1Date, p1Time, p1Utc, p2Date, p2Time, p2Utc].forEach(function (el) {
+  p1Picker.elements.concat(p2Picker.elements, [p1Utc, p2Utc]).forEach(function (el) {
     el.addEventListener("change", tryCompute);
   });
 
